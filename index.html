@@ -1599,11 +1599,20 @@ function draw() {
     for (var i = 0; i < room.items.length; i++) {
         var item = room.items[i];
         if (inventory.indexOf(item.take) >= 0) continue;
-        if (item.hidden) continue; // 隐藏物品不显示
+        // 隐藏物品用特殊方式显示（半透明闪烁）
         
         var ix = item.x * TILE + TILE / 2 + offsetX;
         var iy = item.y * TILE + TILE / 2 + offsetY;
-        drawItem(ix, iy, item.type, item.name);
+        
+        if (item.hidden) {
+            // 隐藏物品：半透明闪烁效果
+            var alpha = 0.3 + 0.2 * Math.sin(Date.now() / 500);
+            ctx.globalAlpha = alpha;
+            drawItem(ix, iy, item.type, item.name);
+            ctx.globalAlpha = 1;
+        } else {
+            drawItem(ix, iy, item.type, item.name);
+        }
         
         if (nearObj && nearObj.name === item.name) {
             ctx.strokeStyle = '#ffd700';
