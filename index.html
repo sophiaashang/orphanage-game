@@ -1,0 +1,2369 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>夜访孤儿院</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            background: #0a0a15; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            overflow: hidden;
+            touch-action: none;
+            font-family: 'Courier New', monospace;
+        }
+        #game { 
+            position: relative; 
+            width: 100vmin;
+            height: 100vmin;
+            max-width: 600px;
+            max-height: 600px;
+        }
+        canvas { 
+            width: 100%; 
+            height: 100%; 
+            display: block;
+            image-rendering: pixelated;
+        }
+        
+        /* 摇杆 */
+        #joystick {
+            position: absolute;
+            left: 20px;
+            bottom: 20px;
+            width: 100px;
+            height: 100px;
+            background: rgba(255,255,255,0.1);
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+        }
+        #knob {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: rgba(255,255,255,0.6);
+            border-radius: 50%;
+            left: 30px;
+            top: 30px;
+        }
+        
+        /* E按钮 */
+        #actBtn {
+            position: absolute;
+            right: 20px;
+            bottom: 30px;
+            width: 70px;
+            height: 70px;
+            background: #c44;
+            border: 3px solid #f66;
+            border-radius: 50%;
+            color: #fff;
+            font-size: 20px;
+            font-weight: bold;
+            display: none;
+        }
+        
+        /* 对话框 */
+        #dialog {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(20,20,40,0.98);
+            border-top: 3px solid #4a4a6a;
+            padding: 15px;
+            display: none;
+            color: #fff;
+            max-height: 50%;
+            overflow-y: auto;
+            touch-action: auto;
+            z-index: 100;
+        }
+        #dialog h3 { color: #ffd700; margin-bottom: 8px; }
+        #dialog p { color: #ddd; font-size: 14px; line-height: 1.6; }
+        #dialog button { 
+            background: #555; 
+            border: 2px solid #777; 
+            color: #fff; 
+            padding: 10px 25px; 
+            cursor: pointer; 
+            margin-top: 10px;
+            font-size: 16px;
+            touch-action: auto;
+            min-height: 44px;
+            min-width: 80px;
+        }
+        #dialog button:active {
+            background: #777;
+            border-color: #999;
+        }
+        
+        /* 提示 */
+        #hint {
+            position: absolute;
+            bottom: 120px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #ffd700;
+            font-size: 14px;
+            background: rgba(0,0,0,0.8);
+            padding: 8px 16px;
+            border-radius: 5px;
+            display: none;
+        }
+        
+        /* 房间名 */
+        #roomName {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: #fff;
+            font-size: 16px;
+            text-shadow: 1px 1px 2px #000;
+            font-family: monospace;
+        }
+        
+        /* 线索计数 */
+        #clueCount {
+            position: absolute;
+            top: 10px;
+            right: 60px;
+            color: #ff6b6b;
+            font-size: 14px;
+            background: rgba(0,0,0,0.8);
+            padding: 6px 12px;
+            border-radius: 5px;
+        }
+        
+        /* 音效按钮 */
+        #soundBtn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 44px;
+            height: 44px;
+            background: rgba(0,0,0,0.8);
+            border: 2px solid #666;
+            border-radius: 50%;
+            color: #888;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #soundBtn.active {
+            color: #0f0;
+            border-color: #0f0;
+        }
+        
+        /* 加载画面 */
+        #loading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #0a0a15;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            z-index: 200;
+        }
+        #loading h2 {
+            font-size: 24px;
+            color: #ff6b6b;
+            margin-bottom: 30px;
+            text-shadow: 0 0 10px #ff0000;
+        }
+        #loadingDots {
+            font-size: 20px;
+            color: #ffd700;
+        }
+        #loadingBar {
+            width: 200px;
+            height: 8px;
+            background: #333;
+            border-radius: 4px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+        #loadingProgress {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #c44, #ffd700);
+            transition: width 0.3s;
+        }
+        
+        /* 主菜单 */
+        #mainMenu {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(180deg, #0a0a15 0%, #1a1a2a 100%);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            z-index: 150;
+            padding: 20px;
+            touch-action: auto;
+        }
+        #mainMenu h1 {
+            font-size: 28px;
+            color: #ff6b6b;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px #ff0000;
+        }
+        #mainMenu .subtitle {
+            color: #888;
+            margin-bottom: 40px;
+            font-size: 14px;
+        }
+        .menuBtn {
+            background: #333;
+            border: 2px solid #555;
+            color: #fff;
+            padding: 15px 40px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin: 8px 0;
+            width: 220px;
+            min-height: 50px;
+            transition: all 0.2s;
+            touch-action: auto;
+        }
+        .menuBtn:active {
+            background: #555;
+            border-color: #ffd700;
+            transform: scale(0.98);
+        }
+        .menuBtn:hover, .menuBtn:active {
+            background: #444;
+            border-color: #ffd700;
+        }
+        .menuBtn:disabled {
+            background: #222;
+            border-color: #333;
+            color: #555;
+            cursor: not-allowed;
+        }
+        .menuBtn:disabled:hover {
+            background: #222;
+            border-color: #333;
+        }
+        
+        /* 章节选择 */
+        #chapterSelect {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(10,10,20,0.98);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            z-index: 160;
+            padding: 20px;
+            touch-action: auto;
+        }
+        #chapterSelect h2 {
+            font-size: 22px;
+            color: #ffd700;
+            margin-bottom: 30px;
+        }
+        .chapterBtn {
+            background: #2a2a3a;
+            border: 2px solid #4a4a6a;
+            color: #ccc;
+            padding: 12px 30px;
+            font-size: 14px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin: 6px 0;
+            width: 250px;
+            min-height: 50px;
+            text-align: left;
+            transition: all 0.2s;
+            touch-action: auto;
+        }
+        .chapterBtn:active:not(:disabled) {
+            background: #3a3a4a;
+            border-color: #ffd700;
+            transform: scale(0.98);
+        }
+        .chapterBtn:hover:not(:disabled) {
+            background: #3a3a4a;
+            border-color: #ffd700;
+        }
+        .chapterBtn:disabled {
+            background: #1a1a2a;
+            border-color: #333;
+            color: #555;
+            cursor: not-allowed;
+        }
+        .chapterBtn .ch-name { color: #ffd700; font-weight: bold; }
+        .chapterBtn .ch-status { font-size: 12px; color: #888; }
+        .chapterBtn .ch-lock { color: #c44; }
+        
+        #backBtn {
+            margin-top: 20px;
+            background: #444;
+            border: 2px solid #666;
+            color: #fff;
+            padding: 10px 30px;
+            font-size: 14px;
+            cursor: pointer;
+            border-radius: 5px;
+            min-height: 44px;
+            touch-action: auto;
+        }
+        #backBtn:active {
+            background: #555;
+        }
+        
+        /* 开场画面 */
+        #intro {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #0a0a15;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            padding: 30px;
+            z-index: 100;
+            touch-action: auto;
+        }
+        #intro h1 {
+            font-size: 32px;
+            color: #ff6b6b;
+            margin-bottom: 30px;
+            text-shadow: 0 0 20px #ff0000;
+        }
+        #intro .story {
+            font-size: 15px;
+            line-height: 2;
+            color: #aaa;
+            text-align: left;
+            max-width: 400px;
+            margin-bottom: 40px;
+        }
+        #intro button {
+            background: #c44;
+            border: 3px solid #f66;
+            color: #fff;
+            padding: 15px 40px;
+            font-size: 18px;
+            cursor: pointer;
+            border-radius: 5px;
+            min-height: 50px;
+            touch-action: auto;
+        }
+        #intro button:active {
+            background: #e55;
+            transform: scale(0.98);
+        }
+        
+        /* 结局画面 */
+        #ending {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(10,10,20,0.98);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            padding: 30px;
+            z-index: 100;
+            touch-action: auto;
+        }
+        #ending h2 {
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+        #ending .ending-text {
+            font-size: 15px;
+            line-height: 2;
+            color: #ccc;
+            text-align: center;
+            max-width: 450px;
+            margin-bottom: 30px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+        #ending button {
+            background: #555;
+            border: 2px solid #777;
+            color: #fff;
+            padding: 12px 30px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            min-height: 44px;
+            touch-action: auto;
+        }
+        #ending button:active {
+            background: #666;
+        }
+        
+        /* 解锁通知 */
+        #unlockNotify {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.9);
+            border: 2px solid #ffd700;
+            padding: 20px 40px;
+            color: #ffd700;
+            font-size: 16px;
+            text-align: center;
+            display: none;
+            z-index: 120;
+            border-radius: 10px;
+            touch-action: auto;
+            pointer-events: none;
+        }
+        #unlockNotify .unlock-icon { font-size: 30px; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <div id="game">
+        <canvas id="canvas"></canvas>
+        <div id="roomName">📍 大厅</div>
+        <div id="clueCount">🔍 线索: 0</div>
+        <button id="soundBtn">🔇</button>
+        <div id="joystick"><div id="knob"></div></div>
+        <button id="actBtn">E</button>
+        <div id="hint"></div>
+        <div id="dialog">
+            <h3 id="dTitle">标题</h3>
+            <p id="dText">内容</p>
+            <button id="dialogBtn" onclick="closeDialog()">确定</button>
+        </div>
+        
+        <!-- 加载画面 -->
+        <div id="loading">
+            <h2>🌙 夜访孤儿院</h2>
+            <div id="loadingDots">正在加载</div>
+            <div id="loadingBar"><div id="loadingProgress"></div></div>
+        </div>
+        
+        <!-- 主菜单 -->
+        <div id="mainMenu">
+            <h1>🌙 夜访孤儿院</h1>
+            <div class="subtitle">探索废弃孤儿院，揭开27条生命的真相</div>
+            <button class="menuBtn" id="newGameBtn" onclick="startNewGame()">新游戏</button>
+            <button class="menuBtn" id="continueBtn" onclick="continueGame()">继续游戏</button>
+            <button class="menuBtn" id="chapterBtn" onclick="showChapterSelect()">选择章节</button>
+            <div style="margin-top: 30px; color: #666; font-size: 12px;">
+                操作：WASD/方向键移动 | E键/点击 交互<br>
+                手机：左侧虚拟摇杆 | 右侧E按钮
+            </div>
+        </div>
+        
+        <!-- 章节选择 -->
+        <div id="chapterSelect">
+            <h2>📖 选择章节</h2>
+            <div id="chapterList"></div>
+            <button id="backBtn" onclick="hideChapterSelect()">返回菜单</button>
+        </div>
+        
+        <!-- 开场画面 -->
+        <div id="intro">
+            <h1>🌙 夜访孤儿院</h1>
+            <div class="story">
+                你是林晓，《城市日报》的调查记者。<br><br>
+                三天前，你收到一封匿名举报信：<br>
+                <span style="color:#ff6b6b">"向阳福利院的孩子...都消失了..."</span><br><br>
+                今晚，你潜入这座废弃的孤儿院，<br>
+                试图揭开被掩埋的真相。<br><br>
+                线索往往藏在细节中，<br>
+                多和幽灵对话，多调查物品，<br>
+                也许能发现隐藏的秘密...<br><br>
+                <span style="color:#ffd700">操作说明：WASD/方向键移动 | E键/点击按钮 交互</span>
+            </div>
+            <button id="startBtn" onclick="beginGame()">开始调查</button>
+        </div>
+        
+        <!-- 结局画面 -->
+        <div id="ending">
+            <h2 id="endingTitle">结局标题</h2>
+            <div class="ending-text" id="endingText">结局内容</div>
+            <button id="endBtn" onclick="returnToMenu()">返回主菜单</button>
+        </div>
+        
+        <!-- 解锁通知 -->
+        <div id="unlockNotify">
+            <div class="unlock-icon">🔓</div>
+            <div id="unlockText">章节已解锁</div>
+        </div>
+    </div>
+
+<script>
+// ===== 音频系统 =====
+var AudioSystem = {
+    ctx: null,
+    enabled: false,
+    bgmOsc: null,
+    bgmGain: null,
+    initialized: false,
+    
+    init: function() {
+        if (this.initialized) return;
+        try {
+            this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+            this.initialized = true;
+        } catch(e) {
+            console.log('Web Audio API not supported');
+        }
+    },
+    
+    resume: function() {
+        if (this.ctx && this.ctx.state === 'suspended') {
+            this.ctx.resume();
+        }
+    },
+    
+    toggle: function() {
+        this.init();
+        this.resume();
+        this.enabled = !this.enabled;
+        document.getElementById('soundBtn').textContent = this.enabled ? '🔊' : '🔇';
+        document.getElementById('soundBtn').classList.toggle('active', this.enabled);
+        
+        if (this.enabled) {
+            this.startBGM();
+        } else {
+            this.stopBGM();
+        }
+    },
+    
+    // 脚步声
+    playStep: function() {
+        if (!this.enabled || !this.ctx) return;
+        var osc = this.ctx.createOscillator();
+        var gain = this.ctx.createGain();
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        
+        osc.frequency.value = 100 + Math.random() * 50;
+        osc.type = 'sine';
+        gain.gain.value = 0.05;
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.1);
+        
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.1);
+    },
+    
+    // 拾取物品
+    playPickup: function() {
+        if (!this.enabled || !this.ctx) return;
+        var osc = this.ctx.createOscillator();
+        var gain = this.ctx.createGain();
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        
+        osc.frequency.value = 440;
+        osc.type = 'sine';
+        gain.gain.value = 0.2;
+        osc.frequency.exponentialRampToValueAtTime(880, this.ctx.currentTime + 0.1);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.2);
+        
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.2);
+    },
+    
+    // 开门声
+    playDoor: function() {
+        if (!this.enabled || !this.ctx) return;
+        var osc = this.ctx.createOscillator();
+        var gain = this.ctx.createGain();
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        
+        osc.type = 'sawtooth';
+        osc.frequency.value = 80;
+        gain.gain.value = 0.1;
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.3);
+        
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.3);
+    },
+    
+    // 对话提示音
+    playDialog: function() {
+        if (!this.enabled || !this.ctx) return;
+        var osc = this.ctx.createOscillator();
+        var gain = this.ctx.createGain();
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        
+        osc.frequency.value = 523.25; // C5
+        osc.type = 'sine';
+        gain.gain.value = 0.1;
+        osc.frequency.setValueAtTime(523.25, this.ctx.currentTime);
+        osc.frequency.setValueAtTime(659.25, this.ctx.currentTime + 0.1); // E5
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.2);
+        
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.2);
+    },
+    
+    // 惊悚音效
+    playHorror: function() {
+        if (!this.enabled || !this.ctx) return;
+        // 低频震动
+        var osc = this.ctx.createOscillator();
+        var gain = this.ctx.createGain();
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        
+        osc.type = 'sawtooth';
+        osc.frequency.value = 50;
+        gain.gain.value = 0.15;
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 1);
+        
+        osc.start();
+        osc.stop(this.ctx.currentTime + 1);
+        
+        // 高频尖叫
+        setTimeout(function() {
+            if (!AudioSystem.enabled || !AudioSystem.ctx) return;
+            var osc2 = AudioSystem.ctx.createOscillator();
+            var gain2 = AudioSystem.ctx.createGain();
+            osc2.connect(gain2);
+            gain2.connect(AudioSystem.ctx.destination);
+            
+            osc2.type = 'sine';
+            osc2.frequency.value = 800;
+            osc2.frequency.exponentialRampToValueAtTime(200, AudioSystem.ctx.currentTime + 0.5);
+            gain2.gain.value = 0.1;
+            gain2.gain.exponentialRampToValueAtTime(0.001, AudioSystem.ctx.currentTime + 0.5);
+            
+            osc2.start();
+            osc2.stop(AudioSystem.ctx.currentTime + 0.5);
+        }, 300);
+    },
+    
+    // 结局音效
+    playEnding: function() {
+        if (!this.enabled || !this.ctx) return;
+        var notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+        for (var i = 0; i < notes.length; i++) {
+            (function(note, delay) {
+                setTimeout(function() {
+                    if (!AudioSystem.enabled || !AudioSystem.ctx) return;
+                    var osc = AudioSystem.ctx.createOscillator();
+                    var gain = AudioSystem.ctx.createGain();
+                    osc.connect(gain);
+                    gain.connect(AudioSystem.ctx.destination);
+                    
+                    osc.frequency.value = note;
+                    osc.type = 'sine';
+                    gain.gain.value = 0.2;
+                    gain.gain.exponentialRampToValueAtTime(0.001, AudioSystem.ctx.currentTime + 0.5);
+                    
+                    osc.start();
+                    osc.stop(AudioSystem.ctx.currentTime + 0.5);
+                }, delay);
+            })(notes[i], i * 200);
+        }
+    },
+    
+    // 章节解锁
+    playUnlock: function() {
+        if (!this.enabled || !this.ctx) return;
+        var osc = this.ctx.createOscillator();
+        var gain = this.ctx.createGain();
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        
+        osc.type = 'sine';
+        osc.frequency.value = 440;
+        gain.gain.value = 0.2;
+        osc.frequency.setValueAtTime(440, this.ctx.currentTime);
+        osc.frequency.setValueAtTime(554.37, this.ctx.currentTime + 0.15);
+        osc.frequency.setValueAtTime(659.25, this.ctx.currentTime + 0.3);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.5);
+        
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.5);
+    },
+    
+    // 背景音乐
+    startBGM: function() {
+        if (!this.enabled || !this.ctx) return;
+        this.stopBGM();
+        
+        this.bgmGain = this.ctx.createGain();
+        this.bgmGain.gain.value = 0.05;
+        this.bgmGain.connect(this.ctx.destination);
+        
+        // 根据场景选择BGM
+        var roomType = this.getRoomType();
+        
+        if (roomType === 'children') {
+            // 孩子的房间 - 诡异的八音盒
+            this.playMusicBox();
+        } else if (roomType === 'office' || roomType === 'basement') {
+            // 办公室/地下室 - 心跳+电子杂音
+            this.playHeartbeat();
+        } else {
+            // 大厅/走廊 - 低沉的风声
+            this.playWind();
+        }
+    },
+    
+    playMusicBox: function() {
+        if (!this.enabled || !this.ctx) return;
+        var notes = [392, 440, 494, 523, 587, 523, 494, 440];
+        var noteIndex = 0;
+        
+        var playNote = function() {
+            if (!AudioSystem.enabled || !AudioSystem.ctx) return;
+            if (AudioSystem.getRoomType() !== 'children') {
+                AudioSystem.startBGM();
+                return;
+            }
+            
+            var osc = AudioSystem.ctx.createOscillator();
+            var gain = AudioSystem.ctx.createGain();
+            osc.connect(gain);
+            gain.connect(AudioSystem.bgmGain);
+            
+            osc.frequency.value = notes[noteIndex];
+            osc.type = 'sine';
+            gain.gain.value = 0.08;
+            gain.gain.exponentialRampToValueAtTime(0.001, AudioSystem.ctx.currentTime + 0.3);
+            
+            osc.start();
+            osc.stop(AudioSystem.ctx.currentTime + 0.3);
+            
+            noteIndex = (noteIndex + 1) % notes.length;
+            setTimeout(playNote, 400);
+        };
+        
+        playNote();
+    },
+    
+    playHeartbeat: function() {
+        if (!this.enabled || !this.ctx) return;
+        var playBeat = function() {
+            if (!AudioSystem.enabled || !AudioSystem.ctx) return;
+            if (AudioSystem.getRoomType() !== 'office' && AudioSystem.getRoomType() !== 'basement') {
+                AudioSystem.startBGM();
+                return;
+            }
+            
+            // 心跳
+            for (var i = 0; i < 2; i++) {
+                (function(delay) {
+                    setTimeout(function() {
+                        if (!AudioSystem.enabled || !AudioSystem.ctx) return;
+                        var osc = AudioSystem.ctx.createOscillator();
+                        var gain = AudioSystem.ctx.createGain();
+                        osc.connect(gain);
+                        gain.connect(AudioSystem.bgmGain);
+                        
+                        osc.frequency.value = 40;
+                        osc.type = 'sine';
+                        gain.gain.value = 0.15;
+                        gain.gain.exponentialRampToValueAtTime(0.001, AudioSystem.ctx.currentTime + 0.15);
+                        
+                        osc.start();
+                        osc.stop(AudioSystem.ctx.currentTime + 0.15);
+                    }, delay);
+                })(i * 150);
+            }
+            
+            // 电子杂音
+            setTimeout(function() {
+                if (!AudioSystem.enabled || !AudioSystem.ctx) return;
+                var bufferSize = AudioSystem.ctx.sampleRate * 0.2;
+                var buffer = AudioSystem.ctx.createBuffer(1, bufferSize, AudioSystem.ctx.sampleRate);
+                var data = buffer.getChannelData(0);
+                for (var j = 0; j < bufferSize; j++) {
+                    data[j] = (Math.random() * 2 - 1) * 0.1;
+                }
+                var noise = AudioSystem.ctx.createBufferSource();
+                noise.buffer = buffer;
+                var noiseGain = AudioSystem.ctx.createGain();
+                noise.connect(noiseGain);
+                noiseGain.connect(AudioSystem.bgmGain);
+                noiseGain.gain.value = 0.03;
+                noise.start();
+            }, 300);
+            
+            setTimeout(playBeat, 1000);
+        };
+        
+        playBeat();
+    },
+    
+    playWind: function() {
+        if (!this.enabled || !this.ctx) return;
+        var playWind = function() {
+            if (!AudioSystem.enabled || !AudioSystem.ctx) return;
+            if (AudioSystem.getRoomType() !== 'hall' && AudioSystem.getRoomType() !== 'corridor') {
+                AudioSystem.startBGM();
+                return;
+            }
+            
+            var bufferSize = AudioSystem.ctx.sampleRate * 2;
+            var buffer = AudioSystem.ctx.createBuffer(1, bufferSize, AudioSystem.ctx.sampleRate);
+            var data = buffer.getChannelData(0);
+            for (var i = 0; i < bufferSize; i++) {
+                data[i] = (Math.random() * 2 - 1) * 0.5;
+            }
+            var noise = AudioSystem.ctx.createBufferSource();
+            noise.buffer = buffer;
+            noise.loop = true;
+            
+            var filter = AudioSystem.ctx.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.value = 200;
+            
+            var windGain = AudioSystem.ctx.createGain();
+            windGain.gain.value = 0.02;
+            
+            noise.connect(filter);
+            filter.connect(windGain);
+            windGain.connect(AudioSystem.bgmGain);
+            
+            noise.start();
+            
+            // 风会渐渐变弱
+            setTimeout(function() {
+                windGain.gain.exponentialRampToValueAtTime(0.001, AudioSystem.ctx.currentTime + 1);
+                setTimeout(function() {
+                    noise.stop();
+                    if (AudioSystem.enabled) playWind();
+                }, 1000);
+            }, 2000);
+        };
+        
+        playWind();
+    },
+    
+    stopBGM: function() {
+        if (this.bgmOsc) {
+            try { this.bgmOsc.stop(); } catch(e) {}
+            this.bgmOsc = null;
+        }
+    },
+    
+    getRoomType: function() {
+        var room = rooms[currentRoom];
+        if (!room) return 'hall';
+        
+        if (room.name.indexOf('小雨') >= 0 || room.name.indexOf('阿杰') >= 0 || room.name.indexOf('小美') >= 0) {
+            return 'children';
+        }
+        if (room.name.indexOf('办公室') >= 0) return 'office';
+        if (room.name.indexOf('后花园') >= 0 || room.name.indexOf('墓地') >= 0) return 'basement';
+        if (room.name.indexOf('大厅') >= 0) return 'hall';
+        return 'corridor';
+    }
+};
+
+// ===== 全局变量 =====
+var canvas = document.getElementById('canvas');
+var ctx = canvas.getContext('2d');
+canvas.width = 600;
+canvas.height = 600;
+
+var TILE = 40;
+var player = { x: 300, y: 500, dir: 'down' };
+var dialogOpen = false;
+var nearObj = null;
+var inventory = [];
+var currentRoom = 'hall';
+var clues = [];
+var clueCount = 0;
+var gameStarted = false;
+var npcTalkCount = {}; // 记录NPC对话次数
+var gameState = 'loading'; // loading, menu, intro, playing, ending
+var unlockedEndings = []; // 已解锁的结局
+var lastRoom = null; // 用于检测房间切换
+
+// 摇杆状态
+var joyActive = false;
+var joyX = 0;
+var joyY = 0;
+var lastStepTime = 0;
+
+// ===== 存档系统 =====
+var SAVE_KEY = 'nightOrphanage_save';
+var SAVE_VERSION = 2;
+
+function saveGame() {
+    var saveData = {
+        version: SAVE_VERSION,
+        currentRoom: currentRoom,
+        playerX: player.x,
+        playerY: player.y,
+        playerDir: player.dir,
+        inventory: inventory,
+        clues: clues,
+        clueCount: clueCount,
+        npcTalkCount: npcTalkCount,
+        unlockedEndings: unlockedEndings,
+        chaptersUnlocked: chaptersUnlocked,
+        timestamp: Date.now()
+    };
+    
+    try {
+        localStorage.setItem(SAVE_KEY, JSON.stringify(saveData));
+    } catch(e) {
+        console.log('Save failed:', e);
+    }
+}
+
+function loadGame() {
+    try {
+        var data = localStorage.getItem(SAVE_KEY);
+        if (!data) return null;
+        
+        var saveData = JSON.parse(data);
+        if (saveData.version !== SAVE_VERSION) {
+            // 版本不匹配，尝试迁移或返回null
+            console.log('Save version mismatch');
+            return null;
+        }
+        
+        return saveData;
+    } catch(e) {
+        console.log('Load failed:', e);
+        return null;
+    }
+}
+
+function hasSaveData() {
+    return loadGame() !== null;
+}
+
+function deleteSave() {
+    try {
+        localStorage.removeItem(SAVE_KEY);
+    } catch(e) {}
+}
+
+// ===== 章节系统 =====
+var chaptersUnlocked = {
+    1: true,  // 第一章默认解锁
+    2: false,
+    3: false,
+    4: false
+};
+
+var chapters = [
+    {
+        id: 1,
+        name: '第一章：初探孤儿院',
+        desc: '探索大厅、走廊和院长办公室',
+        unlockCondition: null,
+        unlocks: ['大厅', '走廊', '院长办公室']
+    },
+    {
+        id: 2,
+        name: '第二章：三个孩子',
+        desc: '发现院长的秘密记录后解锁',
+        unlockCondition: function() { return hasClue('处理记录') || hasClue('向阳计划') || hasClue('院长的日记'); },
+        unlocks: ['小雨的房间', '阿杰的房间', '小美的房间']
+    },
+    {
+        id: 3,
+        name: '第三章：黑暗真相',
+        desc: '收集3个以上线索后解锁',
+        unlockCondition: function() { return clueCount >= 3; },
+        unlocks: ['后花园']
+    },
+    {
+        id: 4,
+        name: '第四章：终结',
+        desc: '获得地下室钥匙后解锁',
+        unlockCondition: function() { return inventory.indexOf('地下室钥匙') >= 0; },
+        unlocks: ['最终真相']
+    }
+];
+
+function checkChapterUnlocks() {
+    for (var i = 2; i <= 4; i++) {
+        if (!chaptersUnlocked[i] && chapters[i-1].unlockCondition) {
+            if (chapters[i-1].unlockCondition()) {
+                chaptersUnlocked[i] = true;
+                showUnlockNotify(chapters[i-1].name);
+                AudioSystem.playUnlock();
+            }
+        }
+    }
+}
+
+function showUnlockNotify(text) {
+    var notify = document.getElementById('unlockNotify');
+    document.getElementById('unlockText').textContent = text + '\n已解锁！';
+    notify.style.display = 'block';
+    setTimeout(function() {
+        notify.style.display = 'none';
+    }, 3000);
+}
+
+// ===== 线索系统 =====
+function addClue(clueName) {
+    if (clues.indexOf(clueName) < 0) {
+        clues.push(clueName);
+        clueCount++;
+        document.getElementById('clueCount').textContent = '🔍 线索: ' + clueCount;
+        AudioSystem.playPickup();
+        
+        // 自动保存
+        saveGame();
+        
+        // 检查章节解锁
+        checkChapterUnlocks();
+        
+        // 检查结局条件
+        if (clueCount >= 5) {
+            setTimeout(checkEnding, 1000);
+        }
+        
+        // 关键线索触发惊悚音效
+        var horrorClues = ['处理记录', '向阳计划', '院长的日记', '阿杰的收藏', '27座坟墓'];
+        if (horrorClues.indexOf(clueName) >= 0) {
+            setTimeout(function() { AudioSystem.playHorror(); }, 500);
+        }
+    }
+}
+
+function hasClue(clueName) {
+    return clues.indexOf(clueName) >= 0;
+}
+
+// ===== 房间数据 =====
+var rooms = {
+    hall: {
+        name: '大厅',
+        bgColor: '#1a1a2a',
+        playerStart: { x: 300, y: 500 },
+        walls: createBorder(15, 15),
+        items: [
+            { x: 11, y: 3, type: 'desk', name: '旧桌子', 
+              text: '桌上有一张褪色的全家福照片，但所有孩子的脸都被墨水涂黑了...' },
+            { x: 3, y: 3, type: 'board', name: '公告栏', 
+              text: '"向阳福利院，用爱托起明天的太阳" —— 落款日期是1998年。\n\n但报纸剪报写着：2001年，向阳福利院因"经费问题"关闭。' },
+            { x: 7, y: 6, type: 'lamp', name: '落地灯', 
+              text: '灯泡闪着微弱的光，底座上刻着一行小字：\n\n"愿所有孩子都能找到家"' }
+        ],
+        npcs: [],
+        exits: [
+            { x: 7, y: 14, to: 'corridor', tx: 300, ty: 80, name: '走廊', chapter: 1 }
+        ]
+    },
+    
+    corridor: {
+        name: '走廊',
+        bgColor: '#1a1a2a',
+        playerStart: { x: 300, y: 80 },
+        walls: createBorder(15, 15),
+        items: [
+            { x: 7, y: 5, type: 'window', name: '封死的窗户', 
+              text: '窗户被木板钉死了，外面透不进一点月光。\n\n透过缝隙，你隐约看到外面有人影闪过...' }
+        ],
+        npcs: [],
+        exits: [
+            { x: 7, y: 14, to: 'hall', tx: 300, ty: 450, name: '大厅', chapter: 1 },
+            { x: 2, y: 1, to: 'office', tx: 100, ty: 300, name: '院长办公室', chapter: 1 },
+            { x: 12, y: 1, to: 'room1', tx: 100, ty: 300, name: '小雨的房间', chapter: 2, requiresChapter: 2 },
+            { x: 2, y: 8, to: 'room2', tx: 100, ty: 300, name: '阿杰的房间', chapter: 2, requiresChapter: 2 },
+            { x: 12, y: 8, to: 'room3', tx: 500, ty: 300, name: '小美的房间', chapter: 2, requiresChapter: 2 }
+        ]
+    },
+    
+    // ===== 小雨的房间 =====
+    room1: {
+        name: '小雨的房间',
+        bgColor: '#2a2035',
+        playerStart: { x: 100, y: 300 },
+        walls: createBorder(15, 15),
+        items: [
+            { x: 3, y: 3, type: 'bed', name: '小床', 
+              text: '被子叠得很整齐，枕头上绣着一朵小雨花。\n\n床头有一张手绘的全家福，画着一个小女孩和一对父母。' },
+            { x: 5, y: 5, type: 'diary', name: '床下的日记本', 
+              text: '你趴下身，在床底发现一本被藏起来的日记...\n\n"我不想偷东西的...但是我太想妈妈了..."\n"我只想偷点钱，去找我的亲生妈妈..."\n"院长说我永远不会有家了..."\n\n【获得线索：日记的秘密】',
+              clue: '日记的秘密' },
+            { x: 9, y: 4, type: 'shelf', name: '小书架', 
+              text: '书架上全是童话书，但有一本的封面被撕掉了。\n\n书名叫《卖火柴的小女孩》...' },
+            { x: 11, y: 7, type: 'window', name: '窗户', 
+              text: '窗户被铁栏杆封住，栏杆间距很窄...\n\n但一个没有双手的孩子，应该可以钻过去吧？' }
+        ],
+        npcs: [
+            { 
+                x: 350, y: 350, 
+                name: '小雨', 
+                color: '#ffb6c1',
+                intro: '一个失去双臂的小女孩，她的灵魂依然在这里等待...',
+                lines: [
+                    '姐姐，你是记者吗？来采访的吗？',
+                    '我小时候发生了一场意外...从很高的地方摔下来...手就没有了...',
+                    '但我很勇敢的！院长说我很快就能找到新家了！',
+                    '（小雨的笑容很灿烂，但你注意到她的影子在颤抖）'
+                ],
+                hiddenLines: [
+                    '（小雨突然压低声音）\n\n其实...我偷过东西...',
+                    '我想拿钱去找我的亲生妈妈...',
+                    '但是院长发现了...她很生气...',
+                    '她说我永远不会有家了...'
+                ],
+                hiddenTrigger: 1
+            }
+        ],
+        exits: [
+            { x: 1, y: 10, to: 'corridor', tx: 450, ty: 300, name: '走廊', chapter: 1 }
+        ]
+    },
+    
+    // ===== 阿杰的房间 =====
+    room2: {
+        name: '阿杰的房间',
+        bgColor: '#201a25',
+        playerStart: { x: 100, y: 300 },
+        walls: createBorder(15, 15),
+        items: [
+            { x: 4, y: 3, type: 'cabinet', name: '木柜', 
+              text: '柜门半开着，里面放着一个玻璃瓶...',
+              clue: '人偶收藏' },
+            { x: 5, y: 4, type: 'bottle', name: '玻璃瓶', 
+              text: '瓶子里装着各种颜色的"碎片"——\n\n纽扣、头发、指甲、牙齿...\n\n你突然意识到什么，胃里一阵翻涌。\n\n【获得线索：阿杰的收藏】',
+              clue: '阿杰的收藏' },
+            { x: 8, y: 6, type: 'doll', name: '人偶"家人"', 
+              text: '用布和棉花缝制的人偶，整整齐齐排成一排。\n\n但它们的眼睛...似乎在看着你。\n\n你发现这些人偶的身体里，塞着一些不该塞的东西...\n\n【获得线索：人偶的真相】',
+              clue: '人偶的真相' },
+            { x: 11, y: 3, type: 'drawer', name: '抽屉', 
+              text: '抽屉里有一张旧照片：\n\n一个小男孩和一对夫妇站在游乐场前。\n\n照片背面写着："杰杰三岁生日，永远爱你。"\n\n但照片被烧掉了一半...' }
+        ],
+        npcs: [
+            { 
+                x: 400, y: 250, 
+                name: '阿杰', 
+                color: '#98d8c8',
+                intro: '一个喜欢收集"碎片"的男孩，他的眼神比同龄人成熟太多...',
+                lines: [
+                    '你喜欢漂亮的东西吗？我也是！',
+                    '我喜欢收集闪闪发光的东西...它们都是我的宝贝...',
+                    '院长夸我做的人偶越来越像真的了！',
+                    '你想看看我的"家人"吗？他们都在这里陪着我...'
+                ],
+                hiddenLines: [
+                    '（阿杰神秘地凑近）\n\n你知道吗？我的真正家人...',
+                    '爸爸、妈妈、还有弟弟...',
+                    '他们现在都"住"在我的房间里了...',
+                    '我们再也不会分开了，永远在一起...'
+                ],
+                hiddenTrigger: 2
+            }
+        ],
+        exits: [
+            { x: 1, y: 5, to: 'corridor', tx: 80, ty: 300, name: '走廊', chapter: 1 }
+        ]
+    },
+    
+    // ===== 小美的房间 =====
+    room3: {
+        name: '小美的房间',
+        bgColor: '#252030',
+        playerStart: { x: 500, y: 300 },
+        walls: createBorder(15, 15),
+        items: [
+            { x: 9, y: 3, type: 'drawer', name: '上锁的抽屉', 
+              text: '抽屉被锁住了，锁孔旁边刻着数字："7"',
+              locked: true },
+            { x: 9, y: 3, type: 'drawer_open', name: '抽屉（已开）', 
+              text: '抽屉里有一叠领养文件和保险单...\n\n"被领养次数：7次"\n"每次领养费：50,000元"\n"终止领养原因：意外死亡"\n\n【获得线索：7次领养】',
+              clue: '7次领养',
+              requires: '钥匙' },
+            { x: 4, y: 5, type: 'mirror', name: '镜子', 
+              text: '镜子上贴着贴纸，写着：\n\n"小美永远8岁 ♡"\n\n但镜子里映出的影子...似乎比8岁高得多。' },
+            { x: 6, y: 8, type: 'book', name: '旧相册', 
+              text: '相册里是各种"幸福家庭"的照片...\n\n但小美在每一张照片里，表情都是一样的：\n\n空洞、麻木、像一只被困住的小动物。' },
+            { x: 11, y: 6, type: 'cage', name: '空鸟笼', 
+              text: '鸟笼门开着，里面有一根羽毛。\n\n笼底刻着一行字："我也想飞走..."' }
+        ],
+        npcs: [
+            { 
+                x: 200, y: 350, 
+                name: '小美', 
+                color: '#dda0dd',
+                intro: '一个永远长不大的孩子，她的眼神里藏着不属于这个年纪的冷漠...',
+                lines: [
+                    '调查这种事情，有意义吗？',
+                    '你不如直接捐款，那样还能做点实事。',
+                    '这个世界的规则，你还不懂。',
+                    '（小美露出一个成熟的微笑）这个世界，呵...'
+                ],
+                hiddenLines: [
+                    '（小美压低声音，像在背诵台词）\n\n我被领养过7次...',
+                    '每一次，都能"赚"一笔...',
+                    '你知道什么是"意外死亡保险"吗？',
+                    '可惜...我活了下来，所以院长很不高兴...'
+                ],
+                hiddenTrigger: 3
+            }
+        ],
+        exits: [
+            { x: 13, y: 5, to: 'corridor', tx: 450, ty: 300, name: '走廊', chapter: 1 }
+        ]
+    },
+    
+    // ===== 院长办公室 =====
+    office: {
+        name: '院长办公室',
+        bgColor: '#1f1f2f',
+        playerStart: { x: 100, y: 300 },
+        walls: createBorder(15, 15),
+        items: [
+            { x: 3, y: 2, type: 'cabinet', name: '档案柜', 
+              text: '柜子里全是孩子们的档案...\n\n但翻到最后一页，上面盖着红色的"已处理"印章。\n\n档案上写着："向阳福利院 · 1998-2001"\n"处理记录：27人"\n\n【获得线索：处理记录】',
+              clue: '处理记录' },
+            { x: 7, y: 3, type: 'computer', name: '旧电脑', 
+              text: '电脑屏幕闪烁着雪花...你需要输入密码。\n\n密码提示：院长的名字拼音 + 出生年份（1945）',
+              password: 'wangmin1945' },
+            { x: 7, y: 4, type: 'computer_open', name: '电脑（已解锁）', 
+              text: '电脑里有一份加密文件...\n\n"向阳计划 - 最终报告"\n"所有孩子已成功"毕业"..."\n"器官匹配率：100%"\n"总收入：8,500,000元"\n\n【获得线索：向阳计划】',
+              clue: '向阳计划',
+              requires: '电脑密码' },
+            { x: 11, y: 4, type: 'desk', name: '办公桌', 
+              text: '桌上有一本黑色笔记本，翻开是院长的日记...\n\n"3月15日：又来了一个孩子，眼睛很漂亮..."\n"5月20日：今天的"货"质量不错，老客户很满意..."\n"11月8日：最后一批了，拿了钱就远走高飞..."\n\n【获得线索：院长的日记】',
+              clue: '院长的日记' },
+            { x: 3, y: 5, type: 'key', name: '钥匙', 
+              text: '一把生锈的钥匙，刻着"地下室"三个字。\n\n【获得物品：地下室钥匙】',
+              take: '地下室钥匙' },
+            { x: 9, y: 6, type: 'safe', name: '保险柜', 
+              text: '保险柜上贴着封条，已经被撕开了。\n\n里面空空如也，但留下了一些纸张碎屑...' }
+        ],
+        npcs: [],
+        exits: [
+            { x: 1, y: 8, to: 'corridor', tx: 80, ty: 300, name: '走廊', chapter: 1 },
+            { x: 7, y: 14, to: 'basement', tx: 300, ty: 80, name: '后花园', chapter: 3, requires: '地下室钥匙', lockedText: '地下室的门锁着，需要钥匙' }
+        ]
+    },
+    
+    // ===== 地下室/后花园 =====
+    basement: {
+        name: '后花园',
+        bgColor: '#151515',
+        playerStart: { x: 300, y: 80 },
+        walls: createBorder(15, 15),
+        items: [
+            { x: 4, y: 4, type: 'grave', name: '小土包 #1', 
+              text: '一个小土包，上面插着一根木牌。\n\n写着："小雪 6岁 安息"\n\n土包旁边有一朵枯萎的小花...' },
+            { x: 6, y: 3, type: 'grave', name: '小土包 #2', 
+              text: '"小明 5岁 安息"\n\n木牌上的字迹歪歪扭扭，像是孩子写的...' },
+            { x: 8, y: 4, type: 'grave', name: '小土包 #3', 
+              text: '"小雨 7岁 安息"\n\n你愣住了...小雨？\n\n你的心突然剧烈跳动起来...' },
+            { x: 10, y: 3, type: 'grave', name: '小土包 #4', 
+              text: '"阿杰 8岁 安息"\n\n阿杰...那个喜欢收集"碎片"的男孩...' },
+            { x: 5, y: 6, type: 'grave', name: '小土包 #5', 
+              text: '"小美 8岁 安息"\n\n小美...永远8岁...永远...' },
+            { x: 9, y: 6, type: 'grave', name: '更多小土包', 
+              text: '你数了数，大大小小的土包有27个。\n\n27个孩子，27条生命，27个被遗忘的灵魂...\n\n【获得线索：27座坟墓】',
+              clue: '27座坟墓' },
+            { x: 7, y: 8, type: 'tree', name: '枯树', 
+              text: '一棵枯死的老槐树，树枝像无数伸出的手。\n\n树干上刻着一行字：\n\n"我在向阳长大，我为向阳骄傲。"\n\n—— 王敏院长 1998' },
+            { x: 7, y: 12, type: 'note', name: '地上的纸片', 
+              text: '你捡起一张被雨水泡烂的纸片...\n\n上面是一个孩子的字迹：\n\n"我叫林小雨，我今年7岁..."\n\n等等...林小雨？\n\n你的名字...好像也是"林"...\n\n【触发隐藏线索】',
+              hidden: true }
+        ],
+        npcs: [],
+        exits: [
+            { x: 7, y: 14, to: 'office', tx: 300, ty: 450, name: '院长办公室', chapter: 3 }
+        ]
+    }
+};
+
+var room = rooms[currentRoom];
+
+// ===== 创建边界墙 =====
+function createBorder(w, h) {
+    var walls = [];
+    for (var x = 0; x < w; x++) {
+        for (var y = 0; y < h; y++) {
+            if (x === 0 || x === w-1 || y === 0 || y === h-1) {
+                walls.push({ x: x, y: y });
+            }
+        }
+    }
+    return walls;
+}
+
+// ===== 加载画面 =====
+function showLoading(callback) {
+    var loadingEl = document.getElementById('loading');
+    var dots = document.getElementById('loadingDots');
+    var progress = document.getElementById('loadingProgress');
+    
+    loadingEl.style.display = 'flex';
+    
+    var progressVal = 0;
+    var dotCount = 0;
+    
+    var interval = setInterval(function() {
+        progressVal += Math.random() * 15 + 5;
+        if (progressVal > 100) progressVal = 100;
+        
+        progress.style.width = progressVal + '%';
+        
+        dotCount = (dotCount + 1) % 4;
+        dots.textContent = '正在加载' + '.'.repeat(dotCount);
+        
+        if (progressVal >= 100) {
+            clearInterval(interval);
+            setTimeout(function() {
+                loadingEl.style.display = 'none';
+                if (callback) callback();
+            }, 500);
+        }
+    }, 200);
+}
+
+// ===== 主菜单 =====
+function showMainMenu() {
+    gameState = 'menu';
+    document.getElementById('mainMenu').style.display = 'flex';
+    
+    // 更新按钮状态
+    var continueBtn = document.getElementById('continueBtn');
+    var chapterBtn = document.getElementById('chapterBtn');
+    
+    if (hasSaveData()) {
+        continueBtn.disabled = false;
+        continueBtn.textContent = '继续游戏';
+    } else {
+        continueBtn.disabled = true;
+        continueBtn.textContent = '无存档';
+    }
+    
+    // 检查章节解锁状态
+    updateChapterButtons();
+}
+
+function updateChapterButtons() {
+    var chapterBtn = document.getElementById('chapterBtn');
+    var hasUnlocked = chaptersUnlocked[2] || chaptersUnlocked[3] || chaptersUnlocked[4];
+    chapterBtn.disabled = !hasUnlocked && !hasSaveData();
+}
+
+function startNewGame() {
+    deleteSave();
+    document.getElementById('mainMenu').style.display = 'none';
+    document.getElementById('intro').style.display = 'flex';
+    
+    // 重置游戏状态
+    resetGameState();
+}
+
+function continueGame() {
+    var saveData = loadGame();
+    if (!saveData) {
+        alert('无法加载存档');
+        return;
+    }
+    
+    // 恢复存档
+    currentRoom = saveData.currentRoom;
+    player.x = saveData.playerX;
+    player.y = saveData.playerY;
+    player.dir = saveData.playerDir || 'down';
+    inventory = saveData.inventory || [];
+    clues = saveData.clues || [];
+    clueCount = saveData.clueCount || 0;
+    npcTalkCount = saveData.npcTalkCount || {};
+    unlockedEndings = saveData.unlockedEndings || [];
+    chaptersUnlocked = saveData.chaptersUnlocked || {1: true, 2: false, 3: false, 4: false};
+    
+    room = rooms[currentRoom];
+    
+    // 更新UI
+    document.getElementById('clueCount').textContent = '🔍 线索: ' + clueCount;
+    document.getElementById('mainMenu').style.display = 'none';
+    
+    beginGame();
+}
+
+function showChapterSelect() {
+    document.getElementById('mainMenu').style.display = 'none';
+    document.getElementById('chapterSelect').style.display = 'flex';
+    
+    var list = document.getElementById('chapterList');
+    list.innerHTML = '';
+    
+    for (var i = 0; i < chapters.length; i++) {
+        var ch = chapters[i];
+        var btn = document.createElement('button');
+        btn.className = 'chapterBtn';
+        
+        var isUnlocked = chaptersUnlocked[ch.id];
+        var isCompleted = unlockedEndings.length > 0;
+        
+        if (isUnlocked) {
+            btn.innerHTML = '<span class="ch-name">' + ch.name + '</span><br>' +
+                           '<span class="ch-status">' + ch.desc + '</span>';
+            btn.onclick = (function(chId) {
+                return function() { loadChapter(chId); };
+            })(ch.id);
+            // 触摸支持
+            btn.addEventListener('touchstart', (function(chId) {
+                return function(e) {
+                    e.preventDefault();
+                    loadChapter(chId);
+                };
+            })(ch.id));
+        } else {
+            btn.innerHTML = '<span class="ch-lock">🔒 ' + ch.name + '</span><br>' +
+                           '<span class="ch-status">' + ch.desc + '</span>';
+            btn.disabled = true;
+        }
+        
+        list.appendChild(btn);
+    }
+}
+
+function hideChapterSelect() {
+    document.getElementById('chapterSelect').style.display = 'none';
+    document.getElementById('mainMenu').style.display = 'flex';
+}
+
+function loadChapter(chapterId) {
+    var chapter = chapters[chapterId - 1];
+    
+    // 根据章节设置初始位置
+    if (chapterId === 1) {
+        currentRoom = 'hall';
+        player.x = 300;
+        player.y = 500;
+    } else if (chapterId === 2) {
+        currentRoom = 'corridor';
+        player.x = 300;
+        player.y = 80;
+    } else if (chapterId === 3) {
+        currentRoom = 'corridor';
+        player.x = 300;
+        player.y = 80;
+    } else if (chapterId === 4) {
+        currentRoom = 'office';
+        player.x = 100;
+        player.y = 300;
+    }
+    
+    room = rooms[currentRoom];
+    document.getElementById('chapterSelect').style.display = 'none';
+    
+    beginGame();
+}
+
+function resetGameState() {
+    currentRoom = 'hall';
+    player = { x: 300, y: 500, dir: 'down' };
+    inventory = [];
+    clues = [];
+    clueCount = 0;
+    npcTalkCount = {};
+    unlockedEndings = [];
+    chaptersUnlocked = {1: true, 2: false, 3: false, 4: false};
+    
+    document.getElementById('clueCount').textContent = '🔍 线索: 0';
+}
+
+function beginGame() {
+    document.getElementById('intro').style.display = 'none';
+    gameStarted = true;
+    gameState = 'playing';
+    
+    // 开始背景音乐
+    if (AudioSystem.enabled) {
+        AudioSystem.startBGM();
+    }
+}
+
+// ===== 结局判断 =====
+function checkEnding() {
+    var hasHiddenClue = hasClue('日记的秘密') && hasClue('7次领养');
+    var hasMainClue = hasClue('处理记录') || hasClue('向阳计划') || hasClue('院长的日记');
+    
+    if (hasClue('林小雨') || (hasClue('日记的秘密') && clues.indexOf('林小雨') >= 0)) {
+        // 隐藏结局
+        if (unlockedEndings.indexOf('hidden') < 0) {
+            unlockedEndings.push('hidden');
+            saveGame();
+        }
+        showEnding('hidden', '🌟 隐藏结局：我是谁？', 
+            '你看着地上的纸片，手指颤抖...\n\n"林小雨...7岁..."\n\n你突然头痛欲裂，记忆像碎片一样涌来——\n\n被拐卖、被送进孤儿院、被人领养、长大后成为记者...\n\n你一直在追查的真相，竟然与自己有关。\n\n27个孩子...包括你自己。\n\n你跪在泥土里，泪流满面。\n\n小雨...那是你失散的双胞胎妹妹吗？\n\n真相已经不重要了，因为你知道——\n\n她们都在这里，永远不会孤单。\n\n【游戏结束】');
+    } else if (clueCount >= 5 && hasMainClue) {
+        // 真相结局
+        if (unlockedEndings.indexOf('truth') < 0) {
+            unlockedEndings.push('truth');
+            saveGame();
+        }
+        showEnding('truth', '📰 真相结局：迟到的正义', 
+            '你整理好所有收集的证据，离开了孤儿院。\n\n一周后，你的报道《向阳孤儿院黑幕：27条生命的消失》登上头版。\n\n王敏院长被逮捕，案件重新调查。\n\n虽然迟到了20年，但真相终于大白于天下。\n\n那些孩子的冤魂，终于可以安息了。\n\n而你——记者林晓，成为了揭露真相的英雄。\n\n【游戏结束】\n\n收集线索：' + clueCount + '/5+');
+    } else {
+        // 普通结局
+        if (unlockedEndings.indexOf('normal') < 0) {
+            unlockedEndings.push('normal');
+            saveGame();
+        }
+        showEnding('normal', '❓ 普通结局：未解之谜', 
+            '你调查了孤儿院，但似乎还有什么没有发现...\n\n离开时，你总觉得有什么在身后注视着你。\n\n那些孩子的故事，或许永远成谜。\n\n但至少，你来过，你看见了。\n\n【游戏结束】\n\n收集线索：' + clueCount + '/5');
+    }
+}
+
+function showEnding(type, title, text) {
+    AudioSystem.playEnding();
+    gameState = 'ending';
+    
+    document.getElementById('endingTitle').textContent = title;
+    document.getElementById('endingTitle').style.color = type === 'hidden' ? '#ffd700' : 
+                                                     type === 'truth' ? '#ff6b6b' : '#aaa';
+    document.getElementById('endingText').textContent = text;
+    document.getElementById('ending').style.display = 'flex';
+}
+
+function returnToMenu() {
+    document.getElementById('ending').style.display = 'none';
+    AudioSystem.stopBGM();
+    showMainMenu();
+}
+
+// ===== 绘制函数 =====
+function draw() {
+    ctx.fillStyle = room.bgColor || '#1a1a2a';
+    ctx.fillRect(0, 0, 600, 600);
+    
+    var offsetX = 300 - player.x;
+    var offsetY = 300 - player.y;
+    
+    // 地板
+    for (var y = 0; y < 15; y++) {
+        for (var x = 0; x < 15; x++) {
+            ctx.fillStyle = (x + y) % 2 ? '#2a2a3a' : '#252535';
+            ctx.fillRect(x * TILE + offsetX, y * TILE + offsetY, TILE, TILE);
+        }
+    }
+    
+    // 墙壁
+    for (var i = 0; i < room.walls.length; i++) {
+        var w = room.walls[i];
+        ctx.fillStyle = '#3a3a5a';
+        ctx.fillRect(w.x * TILE + offsetX, w.y * TILE + offsetY, TILE, TILE);
+        ctx.fillStyle = '#2a2a4a';
+        ctx.fillRect(w.x * TILE + offsetX + 4, w.y * TILE + offsetY + 4, TILE - 8, TILE - 8);
+    }
+    
+    // 物品
+    for (var i = 0; i < room.items.length; i++) {
+        var item = room.items[i];
+        if (inventory.indexOf(item.take) >= 0) continue;
+        if (item.hidden) continue; // 隐藏物品不显示
+        
+        var ix = item.x * TILE + TILE / 2 + offsetX;
+        var iy = item.y * TILE + TILE / 2 + offsetY;
+        drawItem(ix, iy, item.type, item.name);
+        
+        if (nearObj && nearObj.name === item.name) {
+            ctx.strokeStyle = '#ffd700';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(item.x * TILE + offsetX, item.y * TILE + offsetY, TILE, TILE);
+        }
+    }
+    
+    // NPC
+    for (var i = 0; i < room.npcs.length; i++) {
+        var npc = room.npcs[i];
+        var nx = npc.x + offsetX;
+        var ny = npc.y + offsetY;
+        drawGhost(nx, ny, npc.color);
+        
+        if (nearObj && nearObj.name === npc.name) {
+            ctx.strokeStyle = '#ff6666';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(nx - 20, ny - 20, 40, 40);
+            
+            // 显示NPC介绍
+            ctx.fillStyle = 'rgba(0,0,0,0.7)';
+            ctx.fillRect(nx - 60, ny - 55, 120, 25);
+            ctx.fillStyle = '#aaa';
+            ctx.font = '12px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(npc.intro, nx, ny - 38);
+        }
+    }
+    
+    // 出口
+    for (var i = 0; i < room.exits.length; i++) {
+        var e = room.exits[i];
+        var ex = e.x * TILE + offsetX;
+        var ey = e.y * TILE + offsetY;
+        
+        // 检查章节锁定
+        if (e.requiresChapter && !chaptersUnlocked[e.requiresChapter]) {
+            ctx.fillStyle = 'rgba(80,40,40,0.5)';
+        } else if (e.requires && inventory.indexOf(e.requires) < 0) {
+            ctx.fillStyle = 'rgba(100,50,50,0.5)';
+        } else {
+            ctx.fillStyle = 'rgba(100,150,100,0.5)';
+        }
+        ctx.fillRect(ex - TILE/2, ey - TILE/2, TILE, TILE);
+        
+        ctx.fillStyle = '#fff';
+        ctx.font = '10px sans-serif';
+        ctx.textAlign = 'center';
+        
+        var exitLabel = '→' + e.name;
+        if (e.requiresChapter && !chaptersUnlocked[e.requiresChapter]) {
+            exitLabel = '🔒' + e.name;
+        } else if (e.requires && inventory.indexOf(e.requires) < 0) {
+            exitLabel = '🔒' + e.name;
+        }
+        ctx.fillText(exitLabel, ex, ey + 3);
+    }
+    
+    // 玩家
+    drawPlayer(300, 300, player.dir);
+}
+
+function drawPlayer(x, y, dir) {
+    // 身体
+    ctx.fillStyle = '#3498db';
+    ctx.fillRect(x - 8, y - 4, 16, 16);
+    // 脸
+    ctx.fillStyle = '#f5d6c1';
+    ctx.fillRect(x - 6, y - 14, 12, 12);
+    // 头发
+    ctx.fillStyle = '#4a3728';
+    ctx.fillRect(x - 6, y - 16, 12, 6);
+    // 眼睛
+    ctx.fillStyle = '#333';
+    if (dir === 'down') {
+        ctx.fillRect(x - 4, y - 10, 3, 3);
+        ctx.fillRect(x + 1, y - 10, 3, 3);
+    } else if (dir === 'up') {
+        // 背面不画眼睛
+    } else if (dir === 'left') {
+        ctx.fillRect(x - 4, y - 10, 3, 3);
+    } else {
+        ctx.fillRect(x + 1, y - 10, 3, 3);
+    }
+    // 腿
+    ctx.fillStyle = '#2c3e50';
+    ctx.fillRect(x - 6, y + 12, 5, 6);
+    ctx.fillRect(x + 1, y + 12, 5, 6);
+}
+
+function drawGhost(x, y, color) {
+    ctx.globalAlpha = 0.7;
+    // 身体
+    ctx.fillStyle = color || '#a0d0ff';
+    ctx.fillRect(x - 10, y - 8, 20, 20);
+    // 头
+    ctx.fillStyle = '#e0f0ff';
+    ctx.fillRect(x - 8, y - 16, 16, 12);
+    // 眼睛
+    ctx.fillStyle = '#333';
+    ctx.fillRect(x - 5, y - 12, 4, 4);
+    ctx.fillRect(x + 1, y - 12, 4, 4);
+    // 嘴巴
+    ctx.fillRect(x - 3, y - 6, 6, 2);
+    ctx.globalAlpha = 1;
+}
+
+function drawItem(x, y, type, name) {
+    // 绘制物品
+    switch(type) {
+        case 'desk':
+            ctx.fillStyle = '#5a4a3a';
+            ctx.fillRect(x - 18, y - 12, 36, 24);
+            ctx.fillStyle = '#4a3a2a';
+            ctx.fillRect(x - 15, y - 10, 30, 18);
+            ctx.fillStyle = '#3a2a1a';
+            ctx.fillRect(x - 16, y + 12, 6, 8);
+            ctx.fillRect(x + 10, y + 12, 6, 8);
+            break;
+        case 'cabinet':
+        case 'shelf':
+            ctx.fillStyle = '#5a4a3a';
+            ctx.fillRect(x - 16, y - 16, 32, 32);
+            ctx.fillStyle = '#4a3a2a';
+            ctx.fillRect(x - 14, y - 14, 28, 28);
+            ctx.fillStyle = '#8a7a6a';
+            ctx.fillRect(x - 2, y - 10, 4, 20);
+            break;
+        case 'drawer':
+        case 'drawer_open':
+            ctx.fillStyle = '#5a4a3a';
+            ctx.fillRect(x - 14, y - 10, 28, 20);
+            ctx.fillStyle = type === 'drawer_open' ? '#3a2a1a' : '#4a3a2a';
+            ctx.fillRect(x - 12, y - 8, 24, 16);
+            ctx.fillStyle = '#ffd700';
+            ctx.fillRect(x - 3, y - 4, 6, 3);
+            break;
+        case 'board':
+            ctx.fillStyle = '#6a5a4a';
+            ctx.fillRect(x - 14, y - 14, 28, 28);
+            ctx.fillStyle = '#8a7a6a';
+            ctx.fillRect(x - 2, y - 16, 4, 32);
+            ctx.fillStyle = '#ddd';
+            ctx.fillRect(x - 10, y - 10, 20, 20);
+            ctx.fillStyle = '#aaa';
+            ctx.fillRect(x - 6, y - 6, 12, 3);
+            ctx.fillRect(x - 6, y, 12, 3);
+            break;
+        case 'window':
+            ctx.fillStyle = '#3a4a5a';
+            ctx.fillRect(x - 14, y - 16, 28, 32);
+            ctx.fillStyle = '#1a2a3a';
+            ctx.fillRect(x - 10, y - 12, 20, 24);
+            ctx.fillStyle = '#5a6a7a';
+            ctx.fillRect(x - 1, y - 12, 2, 24);
+            ctx.fillRect(x - 10, y - 1, 20, 2);
+            break;
+        case 'lamp':
+            ctx.fillStyle = '#4a4a4a';
+            ctx.fillRect(x - 3, y - 10, 6, 20);
+            ctx.fillStyle = '#ffd700';
+            ctx.fillRect(x - 8, y - 18, 16, 10);
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(x - 5, y - 15, 10, 5);
+            break;
+        case 'key':
+            ctx.fillStyle = '#ffd700';
+            ctx.beginPath();
+            ctx.arc(x - 6, y, 6, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillRect(x - 4, y - 3, 16, 6);
+            ctx.fillStyle = '#daa520';
+            ctx.fillRect(x + 8, y - 3, 4, 6);
+            ctx.fillRect(x + 12, y - 1, 3, 4);
+            break;
+        case 'bed':
+            ctx.fillStyle = '#5a4a3a';
+            ctx.fillRect(x - 18, y - 8, 36, 20);
+            ctx.fillStyle = '#7a6a5a';
+            ctx.fillRect(x - 16, y - 10, 32, 6);
+            ctx.fillStyle = '#f5f5f5';
+            ctx.fillRect(x - 14, y - 8, 10, 16);
+            ctx.fillStyle = '#6a6a8a';
+            ctx.fillRect(x - 2, y - 6, 16, 14);
+            break;
+        case 'toy':
+        case 'doll':
+            ctx.fillStyle = '#d4a574';
+            ctx.beginPath();
+            ctx.arc(x, y - 8, 8, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#c44';
+            ctx.fillRect(x - 6, y, 12, 14);
+            ctx.fillStyle = '#333';
+            ctx.fillRect(x - 4, y - 10, 2, 2);
+            ctx.fillRect(x + 2, y - 10, 2, 2);
+            break;
+        case 'bottle':
+            ctx.fillStyle = '#4a6a8a';
+            ctx.fillRect(x - 6, y - 8, 12, 20);
+            ctx.fillStyle = '#3a5a7a';
+            ctx.fillRect(x - 4, y - 14, 8, 8);
+            ctx.fillStyle = '#6a8aaa';
+            ctx.fillRect(x - 4, y - 4, 8, 10);
+            break;
+        case 'grave':
+            ctx.fillStyle = '#4a4a4a';
+            ctx.fillRect(x - 10, y - 5, 20, 20);
+            ctx.fillStyle = '#6a6a6a';
+            ctx.beginPath();
+            ctx.arc(x, y - 5, 10, Math.PI, 0);
+            ctx.fill();
+            ctx.fillStyle = '#333';
+            ctx.fillRect(x - 2, y - 12, 4, 15);
+            break;
+        case 'tree':
+            ctx.fillStyle = '#4a3a2a';
+            ctx.fillRect(x - 4, y, 8, 20);
+            ctx.fillStyle = '#2a5a2a';
+            ctx.beginPath();
+            ctx.arc(x, y - 10, 18, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#3a6a3a';
+            ctx.beginPath();
+            ctx.arc(x - 8, y - 5, 10, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(x + 8, y - 5, 10, 0, Math.PI * 2);
+            ctx.fill();
+            break;
+        case 'mirror':
+            ctx.fillStyle = '#6a5a4a';
+            ctx.fillRect(x - 12, y - 18, 24, 36);
+            ctx.fillStyle = '#aac';
+            ctx.fillRect(x - 8, y - 14, 16, 28);
+            ctx.fillStyle = '#cce';
+            ctx.fillRect(x - 6, y - 10, 4, 8);
+            break;
+        case 'book':
+            ctx.fillStyle = '#8b4513';
+            ctx.fillRect(x - 12, y - 8, 24, 16);
+            ctx.fillStyle = '#a0522d';
+            ctx.fillRect(x - 10, y - 6, 20, 12);
+            ctx.fillStyle = '#ffd700';
+            ctx.fillRect(x - 8, y - 3, 3, 6);
+            break;
+        case 'diary':
+            ctx.fillStyle = '#8b008b';
+            ctx.fillRect(x - 10, y - 8, 20, 16);
+            ctx.fillStyle = '#9b109b';
+            ctx.fillRect(x - 8, y - 6, 16, 12);
+            ctx.fillStyle = '#ffd700';
+            ctx.fillRect(x - 6, y - 4, 12, 2);
+            ctx.fillStyle = '#c44';
+            ctx.fillRect(x - 1, y - 1, 2, 4);
+            break;
+        case 'note':
+            ctx.fillStyle = '#f5f5dc';
+            ctx.fillRect(x - 10, y - 8, 20, 16);
+            ctx.fillStyle = '#333';
+            for (var n = -6; n < 6; n += 3) {
+                ctx.fillRect(x - 6, y + n, 12, 1);
+            }
+            break;
+        case 'computer':
+            ctx.fillStyle = '#333';
+            ctx.fillRect(x - 14, y - 18, 28, 22);
+            ctx.fillStyle = '#222';
+            ctx.fillRect(x - 10, y - 14, 20, 14);
+            ctx.fillStyle = '#444';
+            ctx.fillRect(x - 10, y + 4, 20, 4);
+            break;
+        case 'computer_open':
+            ctx.fillStyle = '#333';
+            ctx.fillRect(x - 14, y - 18, 28, 22);
+            ctx.fillStyle = '#001100';
+            ctx.fillRect(x - 10, y - 14, 20, 14);
+            ctx.fillStyle = '#0f0';
+            ctx.fillRect(x - 8, y - 12, 8, 2);
+            ctx.fillRect(x - 8, y - 8, 12, 2);
+            ctx.fillRect(x - 8, y - 4, 6, 2);
+            ctx.fillStyle = '#444';
+            ctx.fillRect(x - 10, y + 4, 20, 4);
+            break;
+        case 'safe':
+            ctx.fillStyle = '#555';
+            ctx.fillRect(x - 14, y - 14, 28, 28);
+            ctx.fillStyle = '#333';
+            ctx.fillRect(x - 10, y - 10, 20, 20);
+            ctx.fillStyle = '#888';
+            ctx.beginPath();
+            ctx.arc(x, y, 6, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#666';
+            ctx.fillRect(x - 1, y - 6, 2, 12);
+            break;
+        case 'cage':
+            ctx.strokeStyle = '#888';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(x - 12, y - 18, 24, 30);
+            for (var c = -8; c <= 8; c += 4) {
+                ctx.beginPath();
+                ctx.moveTo(x + c, y - 18);
+                ctx.lineTo(x + c, y + 12);
+                ctx.stroke();
+            }
+            ctx.beginPath();
+            ctx.moveTo(x - 12, y - 6);
+            ctx.lineTo(x + 12, y - 6);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x - 12, y + 6);
+            ctx.lineTo(x + 12, y + 6);
+            ctx.stroke();
+            break;
+        case 'photo':
+            ctx.fillStyle = '#f5f5f5';
+            ctx.fillRect(x - 12, y - 10, 24, 20);
+            ctx.fillStyle = '#ddd';
+            ctx.fillRect(x - 8, y - 6, 16, 12);
+            ctx.fillStyle = '#333';
+            ctx.fillRect(x - 6, y - 4, 4, 6);
+            ctx.fillRect(x + 2, y - 4, 4, 6);
+            break;
+        case 'paper':
+            ctx.fillStyle = '#f5f5dc';
+            ctx.fillRect(x - 8, y - 6, 16, 12);
+            ctx.fillStyle = '#c44';
+            ctx.fillRect(x - 6, y - 4, 4, 2);
+            break;
+        default:
+            ctx.fillStyle = '#8a8a8a';
+            ctx.fillRect(x - 10, y - 10, 20, 20);
+            ctx.fillStyle = '#aaa';
+            ctx.fillRect(x - 6, y - 6, 12, 12);
+    }
+    
+    // 显示物品名称
+    if (name) {
+        ctx.fillStyle = 'rgba(0,0,0,0.7)';
+        ctx.fillRect(x - 30, y + 16, 60, 16);
+        ctx.fillStyle = '#fff';
+        ctx.font = '10px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(name, x, y + 27);
+    }
+}
+
+// ===== 游戏逻辑 =====
+function update() {
+    if (dialogOpen || !gameStarted || gameState === 'ending') return;
+    
+    var dx = 0, dy = 0;
+    var speed = 3;
+    
+    // 键盘
+    if (keysDown['w'] || keysDown['arrowup']) dy = -speed;
+    if (keysDown['s'] || keysDown['arrowdown']) dy = speed;
+    if (keysDown['a'] || keysDown['arrowleft']) dx = -speed;
+    if (keysDown['d'] || keysDown['arrowright']) dx = speed;
+    
+    // 摇杆
+    if (joyActive) {
+        dx = joyX * speed;
+        dy = joyY * speed;
+    }
+    
+    // 斜向移动
+    if (dx !== 0 && dy !== 0) {
+        dx *= 0.707;
+        dy *= 0.707;
+    }
+    
+    // 方向
+    if (dx < 0) player.dir = 'left';
+    else if (dx > 0) player.dir = 'right';
+    else if (dy < 0) player.dir = 'up';
+    else if (dy > 0) player.dir = 'down';
+    
+    // 碰撞检测
+    var newX = player.x + dx;
+    var newY = player.y + dy;
+    var moved = false;
+    
+    if (!checkCollision(newX, player.y)) {
+        player.x = newX;
+        moved = dx !== 0;
+    }
+    if (!checkCollision(player.x, newY)) {
+        player.y = newY;
+        moved = moved || dy !== 0;
+    }
+    
+    // 脚步声
+    if (moved) {
+        var now = Date.now();
+        if (now - lastStepTime > 300) {
+            AudioSystem.playStep();
+            lastStepTime = now;
+        }
+    }
+    
+    // 检查出口
+    checkExits();
+    
+    // 检查附近
+    checkNear();
+    
+    // 更新UI
+    document.getElementById('roomName').textContent = '📍 ' + room.name;
+    document.getElementById('actBtn').style.display = nearObj ? 'block' : 'none';
+    
+    // BGM根据房间切换
+    if (lastRoom !== currentRoom) {
+        lastRoom = currentRoom;
+        if (AudioSystem.enabled) {
+            AudioSystem.startBGM();
+        }
+    }
+}
+
+function checkCollision(x, y) {
+    var tx = Math.floor(x / TILE);
+    var ty = Math.floor(y / TILE);
+    
+    for (var i = 0; i < room.walls.length; i++) {
+        var w = room.walls[i];
+        if (w.x === tx && w.y === ty) return true;
+    }
+    return false;
+}
+
+function checkExits() {
+    for (var i = 0; i < room.exits.length; i++) {
+        var e = room.exits[i];
+        var ex = e.x * TILE + TILE / 2;
+        var ey = e.y * TILE + TILE / 2;
+        var dist = Math.sqrt((player.x - ex) * (player.x - ex) + (player.y - ey) * (player.y - ey));
+        
+        if (dist < 40) {
+            // 检查章节锁定
+            if (e.requiresChapter && !chaptersUnlocked[e.requiresChapter]) {
+                var chapterName = '第' + e.requiresChapter + '章';
+                showDialog('🔒 ' + e.name, '这里被锁住了。需要先完成' + chapterName + '的探索。');
+                return;
+            }
+            
+            // 检查是否需要钥匙
+            if (e.requires && inventory.indexOf(e.requires) < 0) {
+                showDialog('🔒 ' + e.name, e.lockedText || '这扇门需要钥匙才能打开。');
+                return;
+            }
+            
+            // 切换房间
+            AudioSystem.playDoor();
+            room = rooms[e.to];
+            player.x = e.tx;
+            player.y = e.ty;
+            nearObj = null;
+            
+            // 自动保存
+            currentRoom = e.to;
+            saveGame();
+            
+            return;
+        }
+    }
+}
+
+function checkNear() {
+    nearObj = null;
+    
+    // 检查物品
+    for (var i = 0; i < room.items.length; i++) {
+        var item = room.items[i];
+        if (inventory.indexOf(item.take) >= 0) continue;
+        
+        var ix = item.x * TILE + TILE / 2;
+        var iy = item.y * TILE + TILE / 2;
+        var dist = Math.sqrt((player.x - ix) * (player.x - ix) + (player.y - iy) * (player.y - iy));
+        
+        if (dist < 50) {
+            nearObj = item;
+            return;
+        }
+    }
+    
+    // 检查NPC
+    for (var j = 0; j < room.npcs.length; j++) {
+        var npc = room.npcs[j];
+        var dist = Math.sqrt((player.x - npc.x) * (player.x - npc.x) + (player.y - npc.y) * (player.y - npc.y));
+        
+        if (dist < 60) {
+            nearObj = npc;
+            nearObj.isNpc = true;
+            return;
+        }
+    }
+    
+    // 检查出口
+    for (var k = 0; k < room.exits.length; k++) {
+        var e = room.exits[k];
+        var ex = e.x * TILE + TILE / 2;
+        var ey = e.y * TILE + TILE / 2;
+        var dist = Math.sqrt((player.x - ex) * (player.x - ex) + (player.y - ey) * (player.y - ey));
+        
+        if (dist < 50) {
+            nearObj = e;
+            nearObj.isExit = true;
+            return;
+        }
+    }
+}
+
+function interact() {
+    if (dialogOpen) {
+        closeDialog();
+        return;
+    }
+    if (!nearObj) return;
+    
+    if (nearObj.isExit) {
+        // 显示出口信息
+        if (nearObj.requiresChapter && !chaptersUnlocked[nearObj.requiresChapter]) {
+            var chapterName = '第' + nearObj.requiresChapter + '章';
+            showDialog('🔒 ' + nearObj.name, '这里被锁住了。需要先完成' + chapterName + '的探索。');
+        } else if (nearObj.requires && inventory.indexOf(nearObj.requires) < 0) {
+            showDialog('🔒 ' + nearObj.name, nearObj.lockedText || '这扇门需要钥匙。');
+        } else {
+            showDialog('🚪 出口', '按E键/点击按钮进入 → ' + nearObj.name);
+        }
+        return;
+    }
+    
+    if (nearObj.isNpc) {
+        // NPC对话
+        if (!npcTalkCount[nearObj.name]) npcTalkCount[nearObj.name] = 0;
+        
+        var lines = nearObj.lines;
+        // 检查是否解锁隐藏对话
+        if (npcTalkCount[nearObj.name] >= nearObj.hiddenTrigger && nearObj.hiddenLines) {
+            var hiddenIndex = Math.min(npcTalkCount[nearObj.name] - nearObj.hiddenTrigger, nearObj.hiddenLines.length - 1);
+            lines = nearObj.hiddenLines;
+        }
+        
+        if (!nearObj.lineIndex) nearObj.lineIndex = 0;
+        
+        // 如果是隐藏对话
+        if (npcTalkCount[nearObj.name] >= nearObj.hiddenTrigger && nearObj.hiddenLines) {
+            var hiddenIdx = Math.min(npcTalkCount[nearObj.name] - nearObj.hiddenTrigger, nearObj.hiddenLines.length - 1);
+            lines = nearObj.hiddenLines;
+            nearObj.lineIndex = hiddenIdx;
+        }
+        
+        var text = lines[nearObj.lineIndex];
+        
+        // 添加线索
+        if (npcTalkCount[nearObj.name] >= nearObj.hiddenTrigger) {
+            if (npcTalkCount[nearObj.name] === nearObj.hiddenTrigger) {
+                if (nearObj.name === '小雨') addClue('小雨的故事');
+                if (nearObj.name === '阿杰') addClue('阿杰的故事');
+                if (nearObj.name === '小美') addClue('小美的故事');
+            }
+        }
+        
+        npcTalkCount[nearObj.name]++;
+        nearObj.lineIndex = (nearObj.lineIndex + 1) % lines.length;
+        
+        AudioSystem.playDialog();
+        showDialog(nearObj.name + '（幽灵）', text);
+        
+        // 保存对话进度
+        saveGame();
+        
+    } else {
+        // 物品交互
+        if (nearObj.type === 'computer') {
+            var pwd = prompt('请输入密码（提示：院长的名字拼音+出生年份1945）：');
+            if (pwd === nearObj.password) {
+                addClue('向阳计划');
+                showDialog(nearObj.name, rooms.office.items.find(function(i) { return i.type === 'computer_open'; }).text);
+            } else if (pwd !== null) {
+                showDialog(nearObj.name, '密码错误！');
+            }
+            return;
+        }
+        
+        if (nearObj.type === 'drawer' && nearObj.locked) {
+            if (inventory.indexOf('钥匙') >= 0) {
+                nearObj.type = 'drawer_open';
+                nearObj.name = '抽屉（已开）';
+                nearObj.locked = false;
+                nearObj.requires = '钥匙';
+                showDialog('🔓 ' + nearObj.name, rooms.room3.items.find(function(i) { return i.type === 'drawer_open'; }).text);
+                if (rooms.room3.items.find(function(i) { return i.type === 'drawer_open'; }).clue) {
+                    addClue(rooms.room3.items.find(function(i) { return i.type === 'drawer_open'; }).clue);
+                }
+                return;
+            } else {
+                showDialog(nearObj.name, nearObj.text);
+                return;
+            }
+        }
+        
+        if (nearObj.take) {
+            inventory.push(nearObj.take);
+            showDialog(nearObj.name, '【获得物品】\n' + nearObj.text);
+            
+            // 检查第四章解锁
+            if (nearObj.take === '地下室钥匙') {
+                checkChapterUnlocks();
+            }
+        } else {
+            showDialog(nearObj.name, nearObj.text);
+        }
+        
+        // 添加线索
+        if (nearObj.clue && !hasClue(nearObj.clue)) {
+            addClue(nearObj.clue);
+        }
+        
+        // 隐藏物品触发
+        if (nearObj.hidden && nearObj.name === '地上的纸片') {
+            addClue('林小雨');
+            setTimeout(function() {
+                showEnding('hidden', '🌟 隐藏结局：我是谁？', 
+                    '你看着地上的纸片，手指颤抖...\n\n"林小雨...7岁..."\n\n你突然头痛欲裂，记忆像碎片一样涌来——\n\n被拐卖、被送进孤儿院、被人领养、长大后成为记者...\n\n你一直在追查的真相，竟然与自己有关。\n\n27个孩子...包括你自己。\n\n你跪在泥土里，泪流满面。\n\n小雨...那是你失散的双胞胎妹妹吗？\n\n真相已经不重要了，因为你知道——\n\n她们都在这里，永远不会孤单。\n\n【游戏结束】');
+            }, 2000);
+        }
+    }
+}
+
+function showDialog(title, text) {
+    dialogOpen = true;
+    document.getElementById('dTitle').textContent = title;
+    document.getElementById('dText').textContent = text;
+    document.getElementById('dialog').style.display = 'block';
+}
+
+function closeDialog() {
+    dialogOpen = false;
+    document.getElementById('dialog').style.display = 'none';
+}
+
+// ===== 输入处理 =====
+var keysDown = {};
+
+document.addEventListener('keydown', function(e) {
+    keysDown[e.key.toLowerCase()] = true;
+    if (e.key === 'e' || e.key === ' ') {
+        e.preventDefault();
+        interact();
+    }
+});
+
+document.addEventListener('keyup', function(e) {
+    keysDown[e.key.toLowerCase()] = false;
+});
+
+// 音效按钮
+document.getElementById('soundBtn').addEventListener('click', function() {
+    AudioSystem.toggle();
+});
+
+// 摇杆控制
+var joystick = document.getElementById('joystick');
+var knob = document.getElementById('knob');
+
+function moveJoystick(clientX, clientY) {
+    var rect = joystick.getBoundingClientRect();
+    var centerX = rect.left + 50;
+    var centerY = rect.top + 50;
+    
+    var dx = clientX - centerX;
+    var dy = clientY - centerY;
+    var dist = Math.sqrt(dx * dx + dy * dy);
+    
+    if (dist > 40) {
+        dx = dx / dist * 40;
+        dy = dy / dist * 40;
+    }
+    
+    knob.style.left = (30 + dx) + 'px';
+    knob.style.top = (30 + dy) + 'px';
+    
+    joyX = dx / 40;
+    joyY = dy / 40;
+}
+
+joystick.addEventListener('touchstart', function(e) {
+    e.preventDefault();
+    joyActive = true;
+    moveJoystick(e.touches[0].clientX, e.touches[0].clientY);
+});
+
+joystick.addEventListener('touchmove', function(e) {
+    e.preventDefault();
+    if (joyActive) {
+        moveJoystick(e.touches[0].clientX, e.touches[0].clientY);
+    }
+});
+
+joystick.addEventListener('touchend', function(e) {
+    joyActive = false;
+    joyX = 0;
+    joyY = 0;
+    knob.style.left = '30px';
+    knob.style.top = '30px';
+});
+
+// E按钮
+document.getElementById('actBtn').addEventListener('click', interact);
+document.getElementById('actBtn').addEventListener('touchstart', function(e) {
+    e.preventDefault();
+    interact();
+});
+
+// 弹窗按钮 - 触摸支持
+document.getElementById('dialogBtn').addEventListener('touchstart', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    closeDialog();
+});
+
+// 开始游戏按钮 - 触摸支持
+document.getElementById('startBtn').addEventListener('touchstart', function(e) {
+    e.preventDefault();
+    beginGame();
+});
+
+// 结局返回按钮 - 触摸支持
+document.getElementById('endBtn').addEventListener('touchstart', function(e) {
+    e.preventDefault();
+    returnToMenu();
+});
+
+// 主菜单按钮 - 触摸支持
+document.getElementById('newGameBtn').addEventListener('touchstart', function(e) {
+    e.preventDefault();
+    startNewGame();
+});
+document.getElementById('continueBtn').addEventListener('touchstart', function(e) {
+    e.preventDefault();
+    continueGame();
+});
+document.getElementById('chapterBtn').addEventListener('touchstart', function(e) {
+    e.preventDefault();
+    showChapterSelect();
+});
+document.getElementById('backBtn').addEventListener('touchstart', function(e) {
+    e.preventDefault();
+    hideChapterSelect();
+});
+
+// ===== 游戏循环 =====
+function gameLoop() {
+    if (gameStarted && gameState === 'playing') {
+        update();
+        draw();
+    }
+    requestAnimationFrame(gameLoop);
+}
+
+// ===== 初始化 =====
+function init() {
+    showLoading(function() {
+        showMainMenu();
+        gameLoop();
+    });
+}
+
+// 页面加载完成后初始化
+window.addEventListener('load', init);
+</script>
+</body>
+</html>
