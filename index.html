@@ -910,6 +910,7 @@ var currentRoom = 'hall';
 var clues = [];
 var clueCount = 0;
 var gameStarted = false;
+var endingTriggered = false; // 防止重复触发结局
 var npcTalkCount = {}; // 记录NPC对话次数
 var gameState = 'loading'; // loading, menu, intro, playing, ending
 var unlockedEndings = []; // 已解锁的结局
@@ -1051,8 +1052,8 @@ function addClue(clueName) {
         // 检查章节解锁
         checkChapterUnlocks();
         
-        // 检查结局条件
-        if (clueCount >= 5) {
+        // 检查结局条件（只触发一次）
+        if (clueCount >= 5 && !endingTriggered) {
             setTimeout(checkEnding, 1000);
         }
         
@@ -1497,6 +1498,7 @@ function resetGameState() {
     clueCount = 0;
     npcTalkCount = {};
     unlockedEndings = [];
+    endingTriggered = false; // 重置结局触发状态
     chaptersUnlocked = {1: true, 2: false, 3: false, 4: false};
     
     document.getElementById('clueCount').textContent = '🔍 线索: 0';
@@ -1515,11 +1517,15 @@ function beginGame() {
 
 // ===== 结局判断 =====
 function checkEnding() {
+    // 防止重复触发
+    if (endingTriggered) return;
+    
     var hasHiddenClue = hasClue('日记的秘密') && hasClue('7次领养');
     var hasMainClue = hasClue('处理记录') || hasClue('向阳计划') || hasClue('院长的日记');
     
     if (hasClue('林小雨') || (hasClue('日记的秘密') && clues.indexOf('林小雨') >= 0)) {
         // 隐藏结局
+        endingTriggered = true;
         if (unlockedEndings.indexOf('hidden') < 0) {
             unlockedEndings.push('hidden');
             saveGame();
@@ -1528,6 +1534,7 @@ function checkEnding() {
             '你看着地上的纸片，手指颤抖...\n\n"林小雨...7岁..."\n\n你突然头痛欲裂，记忆像碎片一样涌来——\n\n被拐卖、被送进孤儿院、被人领养、长大后成为记者...\n\n你一直在追查的真相，竟然与自己有关。\n\n27个孩子...包括你自己。\n\n你跪在泥土里，泪流满面。\n\n小雨...那是你失散的双胞胎妹妹吗？\n\n真相已经不重要了，因为你知道——\n\n她们都在这里，永远不会孤单。\n\n【游戏结束】');
     } else if (clueCount >= 5 && hasMainClue) {
         // 真相结局
+        endingTriggered = true;
         if (unlockedEndings.indexOf('truth') < 0) {
             unlockedEndings.push('truth');
             saveGame();
@@ -1536,6 +1543,7 @@ function checkEnding() {
             '你整理好所有收集的证据，离开了孤儿院。\n\n一周后，你的报道《向阳孤儿院黑幕：27条生命的消失》登上头版。\n\n王敏院长被逮捕，案件重新调查。\n\n虽然迟到了20年，但真相终于大白于天下。\n\n那些孩子的冤魂，终于可以安息了。\n\n而你——记者林晓，成为了揭露真相的英雄。\n\n【游戏结束】\n\n收集线索：' + clueCount + '/5+');
     } else {
         // 普通结局
+        endingTriggered = true;
         if (unlockedEndings.indexOf('normal') < 0) {
             unlockedEndings.push('normal');
             saveGame();
