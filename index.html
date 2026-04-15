@@ -1713,18 +1713,21 @@ function draw() {
         drawGhost(nx, ny, npc.color, npc.name);
         
         if (nearObj && nearObj.name === npc.name) {
-            // 简洁高亮框
-            ctx.strokeStyle = '#555';
-            ctx.lineWidth = 1;
+            // 高亮框
+            ctx.strokeStyle = '#888';
+            ctx.lineWidth = 2;
             ctx.strokeRect(nx - 16, ny - 22, 32, 40);
             
-            // 显示NPC介绍 - 简洁风格
-            ctx.fillStyle = '#1a1a1a';
-            ctx.fillRect(nx - 55, ny - 50, 110, 20);
-            ctx.fillStyle = '#555';
-            ctx.font = '10px monospace';
+            // 显示NPC介绍 - 更清晰
+            ctx.fillStyle = 'rgba(0,0,0,0.85)';
+            ctx.fillRect(nx - 70, ny - 55, 140, 24);
+            ctx.strokeStyle = '#555';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(nx - 70, ny - 55, 140, 24);
+            ctx.fillStyle = '#ddd';
+            ctx.font = '12px monospace';
             ctx.textAlign = 'center';
-            ctx.fillText(npc.intro, nx, ny - 36);
+            ctx.fillText(npc.intro, nx, ny - 38);
         }
     }
     
@@ -1744,22 +1747,22 @@ function draw() {
         }
         ctx.fillRect(ex - TILE/2, ey - TILE/2, TILE, TILE);
         
-        // 简洁边框
-        ctx.strokeStyle = '#2a2a2a';
+        // 边框
+        ctx.strokeStyle = '#3a3a3a';
         ctx.lineWidth = 1;
         ctx.strokeRect(ex - TILE/2 + 0.5, ey - TILE/2 + 0.5, TILE - 1, TILE - 1);
         
-        ctx.fillStyle = '#555';
-        ctx.font = '9px monospace';
+        ctx.fillStyle = '#aaa';
+        ctx.font = '11px monospace';
         ctx.textAlign = 'center';
         
-        var exitLabel = '>' + e.name;
+        var exitLabel = e.name;
         if (e.requiresChapter && !chaptersUnlocked[e.requiresChapter]) {
-            exitLabel = 'x' + e.name;
+            exitLabel = 'X ' + e.name;
         } else if (e.requires && inventory.indexOf(e.requires) < 0) {
-            exitLabel = 'x' + e.name;
+            exitLabel = 'X ' + e.name;
         }
-        ctx.fillText(exitLabel, ex, ey + 3);
+        ctx.fillText(exitLabel, ex, ey + 4);
     }
     
     // 玩家
@@ -1876,48 +1879,48 @@ function drawPeelingWall(offsetX, offsetY, tileX, tileY) {
     ctx.stroke();
 }
 
-// 玩家绘制 - 参考风格：黑色短发像素小人
+// 玩家绘制 - 像素小人（放大）
 function drawPlayer(x, y, dir) {
     // 身体 - 深色衣服
+    ctx.fillStyle = '#3a3a3a';
+    ctx.fillRect(x - 8, y - 2, 16, 16);
+    
+    // 衣服细节
     ctx.fillStyle = '#2a2a2a';
-    ctx.fillRect(x - 7, y - 2, 14, 14);
+    ctx.fillRect(x - 8, y + 5, 16, 2);
     
-    // 衣服细节 - 像素线条
-    ctx.fillStyle = '#222';
-    ctx.fillRect(x - 7, y + 4, 14, 2);
+    // 脸 - 米白色
+    ctx.fillStyle = '#e8dcc8';
+    ctx.fillRect(x - 6, y - 14, 12, 12);
     
-    // 脸 - 米白色，无明确五官（参考风格）
-    ctx.fillStyle = '#d4c8b8';
-    ctx.fillRect(x - 5, y - 12, 10, 10);
-    
-    // 头发 - 黑色短发（参考风格关键）
+    // 头发 - 黑色短发
     ctx.fillStyle = '#1a1a1a';
     // 刘海
-    ctx.fillRect(x - 5, y - 14, 10, 5);
+    ctx.fillRect(x - 6, y - 16, 12, 6);
     // 两侧
-    ctx.fillRect(x - 6, y - 12, 2, 6);
-    ctx.fillRect(x + 4, y - 12, 2, 6);
+    ctx.fillRect(x - 7, y - 14, 3, 8);
+    ctx.fillRect(x + 4, y - 14, 3, 8);
     // 后脑勺
-    ctx.fillRect(x - 5, y - 14, 2, 4);
-    ctx.fillRect(x + 3, y - 14, 2, 4);
+    ctx.fillRect(x - 6, y - 16, 3, 5);
+    ctx.fillRect(x + 3, y - 16, 3, 5);
     
-    // 眼睛 - 极简
+    // 眼睛
     ctx.fillStyle = '#333';
     if (dir === 'down') {
-        ctx.fillRect(x - 3, y - 8, 2, 2);
-        ctx.fillRect(x + 1, y - 8, 2, 2);
+        ctx.fillRect(x - 3, y - 9, 2, 3);
+        ctx.fillRect(x + 1, y - 9, 2, 3);
     } else if (dir === 'up') {
         // 背面不画眼睛
     } else if (dir === 'left') {
-        ctx.fillRect(x - 3, y - 8, 2, 2);
+        ctx.fillRect(x - 4, y - 9, 2, 3);
     } else {
-        ctx.fillRect(x + 1, y - 8, 2, 2);
+        ctx.fillRect(x + 2, y - 9, 2, 3);
     }
     
-    // 腿 - 深色
-    ctx.fillStyle = '#222';
-    ctx.fillRect(x - 5, y + 12, 4, 5);
-    ctx.fillRect(x + 1, y + 12, 4, 5);
+    // 腿
+    ctx.fillStyle = '#2a2a2a';
+    ctx.fillRect(x - 6, y + 14, 5, 6);
+    ctx.fillRect(x + 1, y + 14, 5, 6);
 }
 
 // NPC幽灵绘制 - 像素风格，简洁但有存在感
@@ -2228,14 +2231,17 @@ function drawItem(x, y, type, name) {
             ctx.fillRect(x - 5, y - 5, 10, 10);
     }
     
-    // 显示物品名称 - 简洁风格
+    // 显示物品名称 - 更清晰
     if (name) {
-        ctx.fillStyle = '#0a0a0a';
-        ctx.fillRect(x - 28, y + 14, 56, 14);
-        ctx.fillStyle = '#555';
-        ctx.font = '9px monospace';
+        ctx.fillStyle = 'rgba(0,0,0,0.8)';
+        ctx.fillRect(x - 40, y + 14, 80, 16);
+        ctx.strokeStyle = '#555';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(x - 40, y + 14, 80, 16);
+        ctx.fillStyle = '#fff';
+        ctx.font = '12px monospace';
         ctx.textAlign = 'center';
-        ctx.fillText(name, x, y + 23);
+        ctx.fillText(name, x, y + 26);
     }
 }
 
