@@ -7,7 +7,7 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
-            background: #000; 
+            background: #1a1a1a; 
             display: flex; 
             justify-content: center; 
             align-items: center; 
@@ -22,9 +22,9 @@
             height: 100vmin;
             max-width: 600px;
             max-height: 600px;
-            /* 极细黑色边框 - 参考风格 */
-            border: 1px solid #1a1a1a;
-            background: #000;
+            /* 极细边框 */
+            border: 2px solid #3a3a3a;
+            background: #1a1a1a;
         }
         canvas { 
             width: 100%; 
@@ -1138,7 +1138,7 @@ function hasClue(clueName) {
 var rooms = {
     hall: {
         name: '大厅',
-        bgColor: '#1a1a2a',
+        bgColor: '#2a2a3a',
         playerStart: { x: 300, y: 500 },
         walls: createBorder(15, 15),
         items: [
@@ -1157,7 +1157,7 @@ var rooms = {
     
     corridor: {
         name: '走廊',
-        bgColor: '#1a1a2a',
+        bgColor: '#2a2a3a',
         playerStart: { x: 300, y: 80 },
         walls: createBorder(15, 15),
         items: [
@@ -1177,7 +1177,7 @@ var rooms = {
     // ===== 小雨的房间 =====
     room1: {
         name: '小雨的房间',
-        bgColor: '#2a2035',
+        bgColor: '#3a3045',
         playerStart: { x: 100, y: 300 },
         walls: createBorder(15, 15),
         items: [
@@ -1220,7 +1220,7 @@ var rooms = {
     // ===== 阿杰的房间 =====
     room2: {
         name: '阿杰的房间',
-        bgColor: '#201a25',
+        bgColor: '#352a35',
         playerStart: { x: 100, y: 300 },
         walls: createBorder(15, 15),
         items: [
@@ -1265,7 +1265,7 @@ var rooms = {
     // ===== 小美的房间 =====
     room3: {
         name: '小美的房间',
-        bgColor: '#252030',
+        bgColor: '#3a3540',
         playerStart: { x: 500, y: 300 },
         walls: createBorder(15, 15),
         items: [
@@ -1312,7 +1312,7 @@ var rooms = {
     // ===== 院长办公室 =====
     office: {
         name: '院长办公室',
-        bgColor: '#1f1f2f',
+        bgColor: '#2f2f3f',
         playerStart: { x: 100, y: 300 },
         walls: createBorder(15, 15),
         items: [
@@ -1345,7 +1345,7 @@ var rooms = {
     // ===== 地下室/后花园 =====
     basement: {
         name: '后花园',
-        bgColor: '#151515',
+        bgColor: '#252525',
         playerStart: { x: 300, y: 80 },
         walls: createBorder(15, 15),
         items: [
@@ -1637,41 +1637,41 @@ function returnToMenu() {
 
 // ===== 绘制函数 - 复古像素风格 =====
 function draw() {
-    // 纯黑背景 - 参考风格
-    ctx.fillStyle = '#000';
+    // 深色背景
+    ctx.fillStyle = '#1a1a1a';
     ctx.fillRect(0, 0, 600, 600);
     
     var offsetX = 300 - player.x;
     var offsetY = 300 - player.y;
     
-    // 地板 - 深灰色复古砖块纹理
+    // 地板 - 灰色砖块纹理（调亮）
     for (var y = 0; y < 15; y++) {
         for (var x = 0; x < 15; x++) {
             // 深浅交替的砖块
-            var shade = ((x + y) % 2) ? '#1a1a1a' : '#151515';
+            var shade = ((x + y) % 2) ? '#3a3a3a' : '#2a2a2a';
             ctx.fillStyle = shade;
             ctx.fillRect(x * TILE + offsetX, y * TILE + offsetY, TILE, TILE);
             
             // 添加砖缝
-            ctx.fillStyle = '#0a0a0a';
+            ctx.fillStyle = '#1a1a1a';
             ctx.fillRect(x * TILE + offsetX, y * TILE + offsetY, TILE, 1);
             ctx.fillRect(x * TILE + offsetX, y * TILE + offsetY, 1, TILE);
         }
     }
     
-    // 墙壁 - 参考风格：极细边框勾勒
+    // 墙壁 - 灰色调（调亮）
     for (var i = 0; i < room.walls.length; i++) {
         var w = room.walls[i];
-        // 外层深色
-        ctx.fillStyle = '#1a1a1a';
+        // 外层
+        ctx.fillStyle = '#3a3a3a';
         ctx.fillRect(w.x * TILE + offsetX, w.y * TILE + offsetY, TILE, TILE);
         
-        // 内层更深的凹陷效果
-        ctx.fillStyle = '#111';
+        // 内层凹陷效果
+        ctx.fillStyle = '#2a2a2a';
         ctx.fillRect(w.x * TILE + offsetX + 2, w.y * TILE + offsetY + 2, TILE - 4, TILE - 4);
         
-        // 极细边框 - 参考风格的关键
-        ctx.strokeStyle = '#2a2a2a';
+        // 边框
+        ctx.strokeStyle = '#4a4a4a';
         ctx.lineWidth = 1;
         ctx.strokeRect(w.x * TILE + offsetX + 0.5, w.y * TILE + offsetY + 0.5, TILE - 1, TILE - 1);
     }
