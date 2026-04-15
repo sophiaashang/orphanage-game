@@ -7,7 +7,7 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
-            background: #0a0a15; 
+            background: #000; 
             display: flex; 
             justify-content: center; 
             align-items: center; 
@@ -22,6 +22,9 @@
             height: 100vmin;
             max-width: 600px;
             max-height: 600px;
+            /* 极细黑色边框 - 参考风格 */
+            border: 1px solid #1a1a1a;
+            background: #000;
         }
         canvas { 
             width: 100%; 
@@ -30,145 +33,177 @@
             image-rendering: pixelated;
         }
         
-        /* 摇杆 */
+        /* 摇杆 - 复古风格 */
         #joystick {
             position: absolute;
             left: 20px;
             bottom: 20px;
-            width: 100px;
-            height: 100px;
-            background: rgba(255,255,255,0.1);
-            border: 3px solid rgba(255,255,255,0.3);
-            border-radius: 50%;
+            width: 90px;
+            height: 90px;
+            background: rgba(30,30,30,0.9);
+            border: 1px solid #3a3a3a;
+            border-radius: 0;
         }
         #knob {
             position: absolute;
-            width: 40px;
-            height: 40px;
-            background: rgba(255,255,255,0.6);
-            border-radius: 50%;
-            left: 30px;
-            top: 30px;
+            width: 36px;
+            height: 36px;
+            background: #555;
+            border: 1px solid #888;
+            left: 27px;
+            top: 27px;
         }
         
-        /* E按钮 */
+        /* E按钮 - 复古红色 */
         #actBtn {
             position: absolute;
             right: 20px;
             bottom: 30px;
-            width: 70px;
-            height: 70px;
-            background: #c44;
-            border: 3px solid #f66;
-            border-radius: 50%;
-            color: #fff;
-            font-size: 20px;
+            width: 60px;
+            height: 60px;
+            background: #1a1a1a;
+            border: 1px solid #8b0000;
+            color: #c44;
+            font-size: 18px;
             font-weight: bold;
             display: none;
+            font-family: monospace;
         }
         
-        /* 对话框 */
+        /* 对话框 - 参考风格：深灰+白色细边框 */
         #dialog {
             position: absolute;
             bottom: 0;
             left: 0;
             right: 0;
-            background: rgba(20,20,40,0.98);
-            border-top: 3px solid #4a4a6a;
-            padding: 15px;
+            background: #1a1a1a;
+            border-top: 1px solid #fff;
+            padding: 15px 20px 25px 20px;
             display: none;
             color: #fff;
             max-height: 50%;
             overflow-y: auto;
             touch-action: auto;
             z-index: 100;
+            font-family: 'Courier New', monospace;
         }
-        #dialog h3 { color: #ffd700; margin-bottom: 8px; }
-        #dialog p { color: #ddd; font-size: 14px; line-height: 1.6; }
-        #dialog button { 
-            background: #555; 
-            border: 2px solid #777; 
+        #dialog h3 { 
+            color: #ccc; 
+            margin-bottom: 8px; 
+            font-size: 14px;
+            font-weight: normal;
+        }
+        #dialog p { 
             color: #fff; 
-            padding: 10px 25px; 
-            cursor: pointer; 
-            margin-top: 10px;
-            font-size: 16px;
-            touch-action: auto;
-            min-height: 44px;
-            min-width: 80px;
+            font-size: 13px; 
+            line-height: 1.7;
         }
-        #dialog button:active {
-            background: #777;
-            border-color: #999;
+        #dialogBtn { 
+            background: transparent; 
+            border: 1px solid #555; 
+            color: #888; 
+            padding: 8px 20px; 
+            cursor: pointer; 
+            margin-top: 12px;
+            font-size: 12px;
+            font-family: monospace;
+            touch-action: auto;
+            min-height: 36px;
+            min-width: 70px;
+            position: absolute;
+            right: 15px;
+            bottom: 15px;
+        }
+        #dialogBtn:active {
+            background: #333;
+            border-color: #888;
+            color: #fff;
+        }
+        /* 对话框右下角下箭头 */
+        #dialog::after {
+            content: '▼';
+            position: absolute;
+            right: 15px;
+            bottom: 8px;
+            color: #666;
+            font-size: 10px;
+            animation: blink 1s infinite;
+        }
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.3; }
         }
         
-        /* 提示 */
+        /* 提示 - 简洁风格 */
         #hint {
             position: absolute;
-            bottom: 120px;
+            bottom: 110px;
             left: 50%;
             transform: translateX(-50%);
-            color: #ffd700;
-            font-size: 14px;
-            background: rgba(0,0,0,0.8);
-            padding: 8px 16px;
-            border-radius: 5px;
+            color: #888;
+            font-size: 12px;
+            background: #0a0a0a;
+            padding: 6px 12px;
+            border: 1px solid #333;
             display: none;
+            font-family: monospace;
         }
         
-        /* 房间名 */
+        /* 房间名 - 左上角 */
         #roomName {
             position: absolute;
             top: 10px;
             left: 10px;
-            color: #fff;
-            font-size: 16px;
-            text-shadow: 1px 1px 2px #000;
+            color: #888;
+            font-size: 12px;
             font-family: monospace;
+            background: #0a0a0a;
+            padding: 4px 8px;
+            border: 1px solid #333;
         }
         
         /* 线索计数 */
         #clueCount {
             position: absolute;
             top: 10px;
-            right: 60px;
-            color: #ff6b6b;
-            font-size: 14px;
-            background: rgba(0,0,0,0.8);
-            padding: 6px 12px;
-            border-radius: 5px;
+            right: 55px;
+            color: #8b0000;
+            font-size: 11px;
+            background: #0a0a0a;
+            padding: 4px 8px;
+            border: 1px solid #333;
+            font-family: monospace;
         }
         
-        /* 音效按钮 */
+        /* 音效按钮 - 简洁 */
         #soundBtn {
             position: absolute;
             top: 10px;
             right: 10px;
-            width: 44px;
-            height: 44px;
-            background: rgba(0,0,0,0.8);
-            border: 2px solid #666;
-            border-radius: 50%;
-            color: #888;
-            font-size: 20px;
+            width: 36px;
+            height: 36px;
+            background: #0a0a0a;
+            border: 1px solid #333;
+            color: #555;
+            font-size: 14px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
         }
         #soundBtn.active {
-            color: #0f0;
-            border-color: #0f0;
+            color: #666;
+            border-color: #555;
         }
         
-        /* 加载画面 */
+        /* 加载画面 - 极简黑色 */
         #loading {
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: #0a0a15;
+            background: #000;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -177,38 +212,39 @@
             z-index: 200;
         }
         #loading h2 {
-            font-size: 24px;
-            color: #ff6b6b;
+            font-size: 18px;
+            color: #8b0000;
             margin-bottom: 30px;
-            text-shadow: 0 0 10px #ff0000;
+            font-weight: normal;
+            letter-spacing: 4px;
         }
         #loadingDots {
-            font-size: 20px;
-            color: #ffd700;
+            font-size: 14px;
+            color: #444;
+            font-family: monospace;
         }
         #loadingBar {
-            width: 200px;
-            height: 8px;
-            background: #333;
-            border-radius: 4px;
+            width: 150px;
+            height: 2px;
+            background: #1a1a1a;
             margin-top: 20px;
             overflow: hidden;
         }
         #loadingProgress {
             width: 0%;
             height: 100%;
-            background: linear-gradient(90deg, #c44, #ffd700);
+            background: #8b0000;
             transition: width 0.3s;
         }
         
-        /* 主菜单 */
+        /* 主菜单 - 深色压抑风格 */
         #mainMenu {
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(180deg, #0a0a15 0%, #1a1a2a 100%);
+            background: #000;
             display: none;
             flex-direction: column;
             justify-content: center;
@@ -219,48 +255,60 @@
             touch-action: auto;
         }
         #mainMenu h1 {
-            font-size: 28px;
-            color: #ff6b6b;
-            margin-bottom: 10px;
-            text-shadow: 0 0 20px #ff0000;
+            font-size: 20px;
+            color: #8b0000;
+            margin-bottom: 8px;
+            font-weight: normal;
+            letter-spacing: 6px;
         }
         #mainMenu .subtitle {
-            color: #888;
-            margin-bottom: 40px;
-            font-size: 14px;
+            color: #444;
+            margin-bottom: 50px;
+            font-size: 11px;
+            letter-spacing: 2px;
         }
         .menuBtn {
-            background: #333;
-            border: 2px solid #555;
-            color: #fff;
-            padding: 15px 40px;
-            font-size: 16px;
+            background: transparent;
+            border: 1px solid #333;
+            color: #666;
+            padding: 14px 50px;
+            font-size: 13px;
             cursor: pointer;
-            border-radius: 5px;
-            margin: 8px 0;
-            width: 220px;
-            min-height: 50px;
+            margin: 6px 0;
+            width: 200px;
+            min-height: 44px;
             transition: all 0.2s;
             touch-action: auto;
+            font-family: monospace;
+            letter-spacing: 2px;
         }
         .menuBtn:active {
-            background: #555;
-            border-color: #ffd700;
-            transform: scale(0.98);
+            background: #1a1a1a;
+            border-color: #8b0000;
+            color: #c44;
         }
         .menuBtn:hover, .menuBtn:active {
-            background: #444;
-            border-color: #ffd700;
+            background: #0a0a0a;
+            border-color: #8b0000;
+            color: #c44;
         }
         .menuBtn:disabled {
-            background: #222;
-            border-color: #333;
-            color: #555;
+            background: transparent;
+            border-color: #222;
+            color: #333;
             cursor: not-allowed;
         }
         .menuBtn:disabled:hover {
-            background: #222;
-            border-color: #333;
+            background: transparent;
+            border-color: #222;
+        }
+        #mainMenu .controls {
+            margin-top: 40px;
+            color: #333;
+            font-size: 10px;
+            text-align: center;
+            line-height: 1.8;
+            letter-spacing: 1px;
         }
         
         /* 章节选择 */
@@ -270,7 +318,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(10,10,20,0.98);
+            background: #000;
             display: none;
             flex-direction: column;
             justify-content: center;
@@ -281,58 +329,61 @@
             touch-action: auto;
         }
         #chapterSelect h2 {
-            font-size: 22px;
-            color: #ffd700;
+            font-size: 14px;
+            color: #666;
             margin-bottom: 30px;
+            font-weight: normal;
+            letter-spacing: 4px;
         }
         .chapterBtn {
-            background: #2a2a3a;
-            border: 2px solid #4a4a6a;
-            color: #ccc;
-            padding: 12px 30px;
-            font-size: 14px;
+            background: transparent;
+            border: 1px solid #333;
+            color: #666;
+            padding: 12px 25px;
+            font-size: 12px;
             cursor: pointer;
-            border-radius: 5px;
-            margin: 6px 0;
-            width: 250px;
-            min-height: 50px;
+            margin: 5px 0;
+            width: 220px;
+            min-height: 44px;
             text-align: left;
             transition: all 0.2s;
             touch-action: auto;
+            font-family: monospace;
         }
         .chapterBtn:active:not(:disabled) {
-            background: #3a3a4a;
-            border-color: #ffd700;
-            transform: scale(0.98);
+            background: #1a1a1a;
+            border-color: #8b0000;
+            color: #c44;
         }
         .chapterBtn:hover:not(:disabled) {
-            background: #3a3a4a;
-            border-color: #ffd700;
+            background: #0a0a0a;
+            border-color: #555;
         }
         .chapterBtn:disabled {
-            background: #1a1a2a;
-            border-color: #333;
-            color: #555;
+            background: transparent;
+            border-color: #222;
+            color: #333;
             cursor: not-allowed;
         }
-        .chapterBtn .ch-name { color: #ffd700; font-weight: bold; }
-        .chapterBtn .ch-status { font-size: 12px; color: #888; }
-        .chapterBtn .ch-lock { color: #c44; }
+        .chapterBtn .ch-name { color: #888; }
+        .chapterBtn .ch-status { font-size: 10px; color: #444; display: block; margin-top: 2px; }
+        .chapterBtn .ch-lock { color: #444; }
         
         #backBtn {
-            margin-top: 20px;
-            background: #444;
-            border: 2px solid #666;
-            color: #fff;
-            padding: 10px 30px;
-            font-size: 14px;
+            margin-top: 25px;
+            background: transparent;
+            border: 1px solid #333;
+            color: #666;
+            padding: 10px 25px;
+            font-size: 11px;
             cursor: pointer;
-            border-radius: 5px;
-            min-height: 44px;
+            min-height: 40px;
             touch-action: auto;
+            font-family: monospace;
         }
         #backBtn:active {
-            background: #555;
+            background: #1a1a1a;
+            border-color: #555;
         }
         
         /* 开场画面 */
@@ -342,7 +393,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: #0a0a15;
+            background: #000;
             display: none;
             flex-direction: column;
             justify-content: flex-start;
@@ -355,47 +406,52 @@
             overflow-y: auto;
         }
         #intro h1 {
-            font-size: 24px;
-            color: #ff6b6b;
-            margin-bottom: 20px;
-            text-shadow: 0 0 20px #ff0000;
+            font-size: 18px;
+            color: #8b0000;
+            margin-bottom: 30px;
+            font-weight: normal;
+            letter-spacing: 6px;
             flex-shrink: 0;
         }
         #intro .story {
-            font-size: 14px;
-            line-height: 1.8;
-            color: #aaa;
+            font-size: 12px;
+            line-height: 2;
+            color: #666;
             text-align: left;
-            max-width: 400px;
+            max-width: 380px;
             margin-bottom: 30px;
             flex-shrink: 0;
+            letter-spacing: 0.5px;
+        }
+        #intro .story span {
+            color: #8b0000;
         }
         #intro button {
-            background: #c44;
-            border: 3px solid #f66;
-            color: #fff;
-            padding: 15px 40px;
-            font-size: 18px;
+            background: transparent;
+            border: 1px solid #8b0000;
+            color: #c44;
+            padding: 14px 40px;
+            font-size: 13px;
             cursor: pointer;
-            border-radius: 5px;
-            min-height: 50px;
+            min-height: 44px;
             touch-action: auto;
             flex-shrink: 0;
             margin-top: auto;
+            font-family: monospace;
+            letter-spacing: 2px;
         }
         #intro button:active {
-            background: #e55;
-            transform: scale(0.98);
+            background: #1a0000;
         }
         
-        /* 结局画面 */
+        /* 结局画面 - 深色压抑 */
         #ending {
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(10,10,20,0.98);
+            background: #000;
             display: none;
             flex-direction: column;
             justify-content: center;
@@ -406,32 +462,36 @@
             touch-action: auto;
         }
         #ending h2 {
-            font-size: 28px;
-            margin-bottom: 20px;
+            font-size: 18px;
+            margin-bottom: 25px;
+            font-weight: normal;
+            letter-spacing: 4px;
         }
         #ending .ending-text {
-            font-size: 15px;
+            font-size: 12px;
             line-height: 2;
-            color: #ccc;
+            color: #666;
             text-align: center;
-            max-width: 450px;
-            margin-bottom: 30px;
+            max-width: 400px;
+            margin-bottom: 35px;
             max-height: 60vh;
             overflow-y: auto;
         }
         #ending button {
-            background: #555;
-            border: 2px solid #777;
-            color: #fff;
+            background: transparent;
+            border: 1px solid #444;
+            color: #888;
             padding: 12px 30px;
-            font-size: 16px;
+            font-size: 12px;
             cursor: pointer;
-            border-radius: 5px;
-            min-height: 44px;
+            min-height: 40px;
             touch-action: auto;
+            font-family: monospace;
         }
         #ending button:active {
-            background: #666;
+            background: #1a1a1a;
+            border-color: #666;
+            color: #aaa;
         }
         
         /* 解锁通知 */
@@ -440,76 +500,81 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(0,0,0,0.9);
-            border: 2px solid #ffd700;
-            padding: 20px 40px;
-            color: #ffd700;
-            font-size: 16px;
+            background: #0a0a0a;
+            border: 1px solid #8b0000;
+            padding: 15px 30px;
+            color: #c44;
+            font-size: 12px;
             text-align: center;
             display: none;
             z-index: 120;
-            border-radius: 10px;
+            font-family: monospace;
+            letter-spacing: 2px;
             touch-action: auto;
             pointer-events: none;
         }
-        #unlockNotify .unlock-icon { font-size: 30px; margin-bottom: 10px; }
+        #unlockNotify .unlock-icon { 
+            font-size: 16px; 
+            margin-bottom: 8px;
+            display: block;
+        }
     </style>
 </head>
 <body>
     <div id="game">
         <canvas id="canvas"></canvas>
-        <div id="roomName">📍 大厅</div>
-        <div id="clueCount">🔍 线索: 0</div>
-        <button id="soundBtn">🔇</button>
+        <div id="roomName">大厅</div>
+        <div id="clueCount">线索: 0</div>
+        <button id="soundBtn">--</button>
         <div id="joystick"><div id="knob"></div></div>
         <button id="actBtn">E</button>
         <div id="hint"></div>
         <div id="dialog">
             <h3 id="dTitle">标题</h3>
             <p id="dText">内容</p>
-            <button id="dialogBtn" onclick="closeDialog()">确定</button>
+            <button id="dialogBtn" onclick="closeDialog()">继续</button>
         </div>
         
         <!-- 加载画面 -->
         <div id="loading">
-            <h2>🌙 夜访孤儿院</h2>
-            <div id="loadingDots">正在加载</div>
+            <h2>夜 访 孤 儿 院</h2>
+            <div id="loadingDots">加载中</div>
             <div id="loadingBar"><div id="loadingProgress"></div></div>
         </div>
         
         <!-- 主菜单 -->
         <div id="mainMenu">
-            <h1>🌙 夜访孤儿院</h1>
+            <h1>夜 访 孤 儿 院</h1>
             <div class="subtitle">探索废弃孤儿院，揭开27条生命的真相</div>
             <button class="menuBtn" id="newGameBtn" onclick="startNewGame()">新游戏</button>
             <button class="menuBtn" id="continueBtn" onclick="continueGame()">继续游戏</button>
             <button class="menuBtn" id="chapterBtn" onclick="showChapterSelect()">选择章节</button>
-            <div style="margin-top: 30px; color: #666; font-size: 12px;">
-                操作：WASD/方向键移动 | E键/点击 交互<br>
+            <div class="controls">
+                WASD/方向键移动 | E键/点击 交互<br>
                 手机：左侧虚拟摇杆 | 右侧E按钮
             </div>
         </div>
         
         <!-- 章节选择 -->
         <div id="chapterSelect">
-            <h2>📖 选择章节</h2>
+            <h2>选择章节</h2>
             <div id="chapterList"></div>
-            <button id="backBtn" onclick="hideChapterSelect()">返回菜单</button>
+            <button id="backBtn" onclick="hideChapterSelect()">返回</button>
         </div>
         
         <!-- 开场画面 -->
         <div id="intro">
-            <h1>🌙 夜访孤儿院</h1>
+            <h1>夜 访 孤 儿 院</h1>
             <div class="story">
                 你是林晓，《城市日报》的调查记者。<br><br>
                 三天前，你收到一封匿名举报信：<br>
-                <span style="color:#ff6b6b">"向阳福利院的孩子...都消失了..."</span><br><br>
+                <span>"向阳福利院的孩子...都消失了..."</span><br><br>
                 今晚，你潜入这座废弃的孤儿院，<br>
                 试图揭开被掩埋的真相。<br><br>
                 线索往往藏在细节中，<br>
                 多和幽灵对话，多调查物品，<br>
                 也许能发现隐藏的秘密...<br><br>
-                <span style="color:#ffd700">操作说明：WASD/方向键移动 | E键/点击按钮 交互</span>
+                <span>操作：WASD/方向键移动 | E键/点击按钮 交互</span>
             </div>
             <button id="startBtn" onclick="beginGame()">开始调查</button>
         </div>
@@ -523,7 +588,7 @@
         
         <!-- 解锁通知 -->
         <div id="unlockNotify">
-            <div class="unlock-icon">🔓</div>
+            <div class="unlock-icon">[解锁]</div>
             <div id="unlockText">章节已解锁</div>
         </div>
     </div>
@@ -557,7 +622,7 @@ var AudioSystem = {
         this.init();
         this.resume();
         this.enabled = !this.enabled;
-        document.getElementById('soundBtn').textContent = this.enabled ? '🔊' : '🔇';
+        document.getElementById('soundBtn').textContent = this.enabled ? '♪' : '--';
         document.getElementById('soundBtn').classList.toggle('active', this.enabled);
         
         if (this.enabled) {
@@ -1043,7 +1108,7 @@ function addClue(clueName) {
     if (clues.indexOf(clueName) < 0) {
         clues.push(clueName);
         clueCount++;
-        document.getElementById('clueCount').textContent = '🔍 线索: ' + clueCount;
+        document.getElementById('clueCount').textContent = '线索: ' + clueCount;
         AudioSystem.playPickup();
         
         // 自动保存
@@ -1412,8 +1477,8 @@ function continueGame() {
     
     room = rooms[currentRoom];
     
-    // 更新UI
-    document.getElementById('clueCount').textContent = '🔍 线索: ' + clueCount;
+    // 更新UI - 简洁风格
+    document.getElementById('clueCount').textContent = '线索: ' + clueCount;
     document.getElementById('mainMenu').style.display = 'none';
     
     beginGame();
@@ -1501,7 +1566,7 @@ function resetGameState() {
     endingTriggered = false; // 重置结局触发状态
     chaptersUnlocked = {1: true, 2: false, 3: false, 4: false};
     
-    document.getElementById('clueCount').textContent = '🔍 线索: 0';
+    document.getElementById('clueCount').textContent = '线索: 0';
 }
 
 function beginGame() {
@@ -1530,7 +1595,7 @@ function checkEnding() {
             unlockedEndings.push('hidden');
             saveGame();
         }
-        showEnding('hidden', '🌟 隐藏结局：我是谁？', 
+        showEnding('hidden', '[隐藏结局] 我是谁？', 
             '你看着地上的纸片，手指颤抖...\n\n"林小雨...7岁..."\n\n你突然头痛欲裂，记忆像碎片一样涌来——\n\n被拐卖、被送进孤儿院、被人领养、长大后成为记者...\n\n你一直在追查的真相，竟然与自己有关。\n\n27个孩子...包括你自己。\n\n你跪在泥土里，泪流满面。\n\n小雨...那是你失散的双胞胎妹妹吗？\n\n真相已经不重要了，因为你知道——\n\n她们都在这里，永远不会孤单。\n\n【游戏结束】');
     } else if (clueCount >= 5 && hasMainClue) {
         // 真相结局
@@ -1539,7 +1604,7 @@ function checkEnding() {
             unlockedEndings.push('truth');
             saveGame();
         }
-        showEnding('truth', '📰 真相结局：迟到的正义', 
+        showEnding('truth', '[真相结局] 迟到的正义', 
             '你整理好所有收集的证据，离开了孤儿院。\n\n一周后，你的报道《向阳孤儿院黑幕：27条生命的消失》登上头版。\n\n王敏院长被逮捕，案件重新调查。\n\n虽然迟到了20年，但真相终于大白于天下。\n\n那些孩子的冤魂，终于可以安息了。\n\n而你——记者林晓，成为了揭露真相的英雄。\n\n【游戏结束】\n\n收集线索：' + clueCount + '/5+');
     } else {
         // 普通结局
@@ -1548,7 +1613,7 @@ function checkEnding() {
             unlockedEndings.push('normal');
             saveGame();
         }
-        showEnding('normal', '❓ 普通结局：未解之谜', 
+        showEnding('normal', '[普通结局] 未解之谜', 
             '你调查了孤儿院，但似乎还有什么没有发现...\n\n离开时，你总觉得有什么在身后注视着你。\n\n那些孩子的故事，或许永远成谜。\n\n但至少，你来过，你看见了。\n\n【游戏结束】\n\n收集线索：' + clueCount + '/5');
     }
 }
@@ -1558,8 +1623,8 @@ function showEnding(type, title, text) {
     gameState = 'ending';
     
     document.getElementById('endingTitle').textContent = title;
-    document.getElementById('endingTitle').style.color = type === 'hidden' ? '#ffd700' : 
-                                                     type === 'truth' ? '#ff6b6b' : '#aaa';
+    document.getElementById('endingTitle').style.color = type === 'hidden' ? '#8b0000' : 
+                                                     type === 'truth' ? '#666' : '#444';
     document.getElementById('endingText').textContent = text;
     document.getElementById('ending').style.display = 'flex';
 }
@@ -1570,43 +1635,61 @@ function returnToMenu() {
     showMainMenu();
 }
 
-// ===== 绘制函数 =====
+// ===== 绘制函数 - 复古像素风格 =====
 function draw() {
-    ctx.fillStyle = room.bgColor || '#1a1a2a';
+    // 纯黑背景 - 参考风格
+    ctx.fillStyle = '#000';
     ctx.fillRect(0, 0, 600, 600);
     
     var offsetX = 300 - player.x;
     var offsetY = 300 - player.y;
     
-    // 地板
+    // 地板 - 深灰色复古砖块纹理
     for (var y = 0; y < 15; y++) {
         for (var x = 0; x < 15; x++) {
-            ctx.fillStyle = (x + y) % 2 ? '#2a2a3a' : '#252535';
+            // 深浅交替的砖块
+            var shade = ((x + y) % 2) ? '#1a1a1a' : '#151515';
+            ctx.fillStyle = shade;
             ctx.fillRect(x * TILE + offsetX, y * TILE + offsetY, TILE, TILE);
+            
+            // 添加砖缝
+            ctx.fillStyle = '#0a0a0a';
+            ctx.fillRect(x * TILE + offsetX, y * TILE + offsetY, TILE, 1);
+            ctx.fillRect(x * TILE + offsetX, y * TILE + offsetY, 1, TILE);
         }
     }
     
-    // 墙壁
+    // 墙壁 - 参考风格：极细边框勾勒
     for (var i = 0; i < room.walls.length; i++) {
         var w = room.walls[i];
-        ctx.fillStyle = '#3a3a5a';
+        // 外层深色
+        ctx.fillStyle = '#1a1a1a';
         ctx.fillRect(w.x * TILE + offsetX, w.y * TILE + offsetY, TILE, TILE);
-        ctx.fillStyle = '#2a2a4a';
-        ctx.fillRect(w.x * TILE + offsetX + 4, w.y * TILE + offsetY + 4, TILE - 8, TILE - 8);
+        
+        // 内层更深的凹陷效果
+        ctx.fillStyle = '#111';
+        ctx.fillRect(w.x * TILE + offsetX + 2, w.y * TILE + offsetY + 2, TILE - 4, TILE - 4);
+        
+        // 极细边框 - 参考风格的关键
+        ctx.strokeStyle = '#2a2a2a';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(w.x * TILE + offsetX + 0.5, w.y * TILE + offsetY + 0.5, TILE - 1, TILE - 1);
     }
+    
+    // 房间特定恐怖装饰
+    drawRoomDecorations(offsetX, offsetY);
     
     // 物品
     for (var i = 0; i < room.items.length; i++) {
         var item = room.items[i];
         if (inventory.indexOf(item.take) >= 0) continue;
-        // 隐藏物品用特殊方式显示（半透明闪烁）
         
         var ix = item.x * TILE + TILE / 2 + offsetX;
         var iy = item.y * TILE + TILE / 2 + offsetY;
         
         if (item.hidden) {
-            // 隐藏物品：半透明闪烁效果
-            var alpha = 0.3 + 0.2 * Math.sin(Date.now() / 500);
+            // 隐藏物品：微弱闪烁
+            var alpha = 0.2 + 0.15 * Math.sin(Date.now() / 500);
             ctx.globalAlpha = alpha;
             drawItem(ix, iy, item.type, item.name);
             ctx.globalAlpha = 1;
@@ -1614,32 +1697,34 @@ function draw() {
             drawItem(ix, iy, item.type, item.name);
         }
         
+        // 高亮提示 - 参考风格改为简洁白框
         if (nearObj && nearObj.name === item.name) {
-            ctx.strokeStyle = '#ffd700';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(item.x * TILE + offsetX, item.y * TILE + offsetY, TILE, TILE);
+            ctx.strokeStyle = '#666';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(item.x * TILE + offsetX + 2, item.y * TILE + offsetY + 2, TILE - 4, TILE - 4);
         }
     }
     
-    // NPC
+    // NPC - 像素幽灵风格
     for (var i = 0; i < room.npcs.length; i++) {
         var npc = room.npcs[i];
         var nx = npc.x + offsetX;
         var ny = npc.y + offsetY;
-        drawGhost(nx, ny, npc.color);
+        drawGhost(nx, ny, npc.color, npc.name);
         
         if (nearObj && nearObj.name === npc.name) {
-            ctx.strokeStyle = '#ff6666';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(nx - 20, ny - 20, 40, 40);
+            // 简洁高亮框
+            ctx.strokeStyle = '#555';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(nx - 16, ny - 22, 32, 40);
             
-            // 显示NPC介绍
-            ctx.fillStyle = 'rgba(0,0,0,0.7)';
-            ctx.fillRect(nx - 60, ny - 55, 120, 25);
-            ctx.fillStyle = '#aaa';
-            ctx.font = '12px sans-serif';
+            // 显示NPC介绍 - 简洁风格
+            ctx.fillStyle = '#1a1a1a';
+            ctx.fillRect(nx - 55, ny - 50, 110, 20);
+            ctx.fillStyle = '#555';
+            ctx.font = '10px monospace';
             ctx.textAlign = 'center';
-            ctx.fillText(npc.intro, nx, ny - 38);
+            ctx.fillText(npc.intro, nx, ny - 36);
         }
     }
     
@@ -1649,25 +1734,30 @@ function draw() {
         var ex = e.x * TILE + offsetX;
         var ey = e.y * TILE + offsetY;
         
-        // 检查章节锁定
+        // 检查章节锁定 - 简洁风格
         if (e.requiresChapter && !chaptersUnlocked[e.requiresChapter]) {
-            ctx.fillStyle = 'rgba(80,40,40,0.5)';
+            ctx.fillStyle = '#0d0d0d';
         } else if (e.requires && inventory.indexOf(e.requires) < 0) {
-            ctx.fillStyle = 'rgba(100,50,50,0.5)';
+            ctx.fillStyle = '#0d0808';
         } else {
-            ctx.fillStyle = 'rgba(100,150,100,0.5)';
+            ctx.fillStyle = '#080d08';
         }
         ctx.fillRect(ex - TILE/2, ey - TILE/2, TILE, TILE);
         
-        ctx.fillStyle = '#fff';
-        ctx.font = '10px sans-serif';
+        // 简洁边框
+        ctx.strokeStyle = '#2a2a2a';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(ex - TILE/2 + 0.5, ey - TILE/2 + 0.5, TILE - 1, TILE - 1);
+        
+        ctx.fillStyle = '#555';
+        ctx.font = '9px monospace';
         ctx.textAlign = 'center';
         
-        var exitLabel = '→' + e.name;
+        var exitLabel = '>' + e.name;
         if (e.requiresChapter && !chaptersUnlocked[e.requiresChapter]) {
-            exitLabel = '🔒' + e.name;
+            exitLabel = 'x' + e.name;
         } else if (e.requires && inventory.indexOf(e.requires) < 0) {
-            exitLabel = '🔒' + e.name;
+            exitLabel = 'x' + e.name;
         }
         ctx.fillText(exitLabel, ex, ey + 3);
     }
@@ -1676,289 +1766,476 @@ function draw() {
     drawPlayer(300, 300, player.dir);
 }
 
+// 房间恐怖装饰
+function drawRoomDecorations(offsetX, offsetY) {
+    var roomName = room.name;
+    
+    // 后花园 - 血迹效果
+    if (roomName.indexOf('后花园') >= 0 || roomName.indexOf('花园') >= 0) {
+        drawBloodStain(offsetX, offsetY, 3, 10, 40);
+        drawBloodStain(offsetX, offsetY, 5, 8, 25);
+        drawBloodStain(offsetX, offsetY, 9, 5, 35);
+    }
+    
+    // 阿杰的房间 - 更浓的血迹
+    if (roomName.indexOf('阿杰') >= 0) {
+        drawBloodStain(offsetX, offsetY, 4, 6, 50);
+        drawBloodStain(offsetX, offsetY, 8, 9, 30);
+        drawCrack(offsetX, offsetY, 2, 3);
+    }
+    
+    // 办公室 - 墙壁裂缝
+    if (roomName.indexOf('办公室') >= 0 || roomName.indexOf('办公室') >= 0) {
+        drawCrack(offsetX, offsetY, 10, 2);
+        drawCrack(offsetX, offsetY, 4, 12);
+    }
+    
+    // 小雨的房间 - 霉斑
+    if (roomName.indexOf('小雨') >= 0) {
+        drawMold(offsetX, offsetY, 1, 5);
+        drawMold(offsetX, offsetY, 13, 8);
+    }
+    
+    // 小美的房间 - 脱落的墙皮
+    if (roomName.indexOf('小美') >= 0) {
+        drawPeelingWall(offsetX, offsetY, 11, 4);
+        drawCrack(offsetX, offsetY, 3, 7);
+    }
+}
+
+// 血迹效果 - 参考风格
+function drawBloodStain(offsetX, offsetY, tileX, tileY, size) {
+    var bx = tileX * TILE + TILE / 2 + offsetX;
+    var by = tileY * TILE + TILE / 2 + offsetY;
+    
+    ctx.fillStyle = '#2a0000';
+    // 主血迹
+    ctx.beginPath();
+    ctx.arc(bx, by, size / 3, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // 溅射痕迹
+    ctx.fillStyle = '#1a0000';
+    for (var i = 0; i < 4; i++) {
+        var angle = Math.random() * Math.PI * 2;
+        var dist = size / 2 + Math.random() * size / 2;
+        var sx = bx + Math.cos(angle) * dist;
+        var sy = by + Math.sin(angle) * dist;
+        ctx.beginPath();
+        ctx.arc(sx, sy, 2 + Math.random() * 3, 0, Math.PI * 2);
+        ctx.fill();
+    }
+}
+
+// 墙壁裂缝
+function drawCrack(offsetX, offsetY, tileX, tileY) {
+    var cx = tileX * TILE + offsetX;
+    var cy = tileY * TILE + offsetY;
+    
+    ctx.strokeStyle = '#111';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + 8, cy + 12);
+    ctx.lineTo(cx + 15, cy + 8);
+    ctx.lineTo(cx + 20, cy + 18);
+    ctx.stroke();
+}
+
+// 霉斑
+function drawMold(offsetX, offsetY, tileX, tileY) {
+    var mx = tileX * TILE + TILE / 2 + offsetX;
+    var my = tileY * TILE + TILE / 2 + offsetY;
+    
+    ctx.fillStyle = '#1a1a1a';
+    for (var i = 0; i < 5; i++) {
+        var ox = (Math.random() - 0.5) * 20;
+        var oy = (Math.random() - 0.5) * 20;
+        ctx.beginPath();
+        ctx.arc(mx + ox, my + oy, 3 + Math.random() * 4, 0, Math.PI * 2);
+        ctx.fill();
+    }
+}
+
+// 脱落墙皮
+function drawPeelingWall(offsetX, offsetY, tileX, tileY) {
+    var px = tileX * TILE + offsetX;
+    var py = tileY * TILE + offsetY;
+    
+    ctx.fillStyle = '#1a1a1a';
+    ctx.beginPath();
+    ctx.moveTo(px, py);
+    ctx.lineTo(px + 15, py + 5);
+    ctx.lineTo(px + 20, py + 15);
+    ctx.lineTo(px + 5, py + 12);
+    ctx.closePath();
+    ctx.fill();
+    
+    ctx.strokeStyle = '#0a0a0a';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+}
+
+// 玩家绘制 - 参考风格：黑色短发像素小人
 function drawPlayer(x, y, dir) {
-    // 身体
-    ctx.fillStyle = '#3498db';
-    ctx.fillRect(x - 8, y - 4, 16, 16);
-    // 脸
-    ctx.fillStyle = '#f5d6c1';
-    ctx.fillRect(x - 6, y - 14, 12, 12);
-    // 头发
-    ctx.fillStyle = '#4a3728';
-    ctx.fillRect(x - 6, y - 16, 12, 6);
-    // 眼睛
+    // 身体 - 深色衣服
+    ctx.fillStyle = '#2a2a2a';
+    ctx.fillRect(x - 7, y - 2, 14, 14);
+    
+    // 衣服细节 - 像素线条
+    ctx.fillStyle = '#222';
+    ctx.fillRect(x - 7, y + 4, 14, 2);
+    
+    // 脸 - 米白色，无明确五官（参考风格）
+    ctx.fillStyle = '#d4c8b8';
+    ctx.fillRect(x - 5, y - 12, 10, 10);
+    
+    // 头发 - 黑色短发（参考风格关键）
+    ctx.fillStyle = '#1a1a1a';
+    // 刘海
+    ctx.fillRect(x - 5, y - 14, 10, 5);
+    // 两侧
+    ctx.fillRect(x - 6, y - 12, 2, 6);
+    ctx.fillRect(x + 4, y - 12, 2, 6);
+    // 后脑勺
+    ctx.fillRect(x - 5, y - 14, 2, 4);
+    ctx.fillRect(x + 3, y - 14, 2, 4);
+    
+    // 眼睛 - 极简
     ctx.fillStyle = '#333';
     if (dir === 'down') {
-        ctx.fillRect(x - 4, y - 10, 3, 3);
-        ctx.fillRect(x + 1, y - 10, 3, 3);
+        ctx.fillRect(x - 3, y - 8, 2, 2);
+        ctx.fillRect(x + 1, y - 8, 2, 2);
     } else if (dir === 'up') {
         // 背面不画眼睛
     } else if (dir === 'left') {
-        ctx.fillRect(x - 4, y - 10, 3, 3);
+        ctx.fillRect(x - 3, y - 8, 2, 2);
     } else {
-        ctx.fillRect(x + 1, y - 10, 3, 3);
+        ctx.fillRect(x + 1, y - 8, 2, 2);
     }
-    // 腿
-    ctx.fillStyle = '#2c3e50';
-    ctx.fillRect(x - 6, y + 12, 5, 6);
-    ctx.fillRect(x + 1, y + 12, 5, 6);
+    
+    // 腿 - 深色
+    ctx.fillStyle = '#222';
+    ctx.fillRect(x - 5, y + 12, 4, 5);
+    ctx.fillRect(x + 1, y + 12, 4, 5);
 }
 
-function drawGhost(x, y, color) {
-    ctx.globalAlpha = 0.7;
-    // 身体
-    ctx.fillStyle = color || '#a0d0ff';
-    ctx.fillRect(x - 10, y - 8, 20, 20);
-    // 头
-    ctx.fillStyle = '#e0f0ff';
-    ctx.fillRect(x - 8, y - 16, 16, 12);
-    // 眼睛
-    ctx.fillStyle = '#333';
-    ctx.fillRect(x - 5, y - 12, 4, 4);
-    ctx.fillRect(x + 1, y - 12, 4, 4);
-    // 嘴巴
-    ctx.fillRect(x - 3, y - 6, 6, 2);
+// NPC幽灵绘制 - 像素风格，简洁但有存在感
+function drawGhost(x, y, color, name) {
+    // 半透明身体
+    ctx.globalAlpha = 0.6;
+    
+    // 身体轮廓
+    ctx.fillStyle = '#1a1a1a';
+    ctx.fillRect(x - 10, y - 6, 20, 18);
+    
+    // 头部
+    ctx.fillStyle = '#252525';
+    ctx.fillRect(x - 8, y - 14, 16, 12);
+    
+    // 角色特定颜色标识（简洁的色块）
+    if (name === '小雨') {
+        // 粉色标识 - 小女孩
+        ctx.fillStyle = '#3a2a2a';
+        ctx.fillRect(x - 8, y - 14, 16, 12);
+        ctx.fillStyle = '#2a1a1a';
+        ctx.fillRect(x - 6, y - 12, 12, 8);
+    } else if (name === '阿杰') {
+        // 灰绿色标识
+        ctx.fillStyle = '#2a2a1a';
+        ctx.fillRect(x - 8, y - 14, 16, 12);
+    } else if (name === '小美') {
+        // 紫色标识
+        ctx.fillStyle = '#2a1a2a';
+        ctx.fillRect(x - 8, y - 14, 16, 12);
+    }
+    
+    // 眼睛 - 发光效果
+    ctx.fillStyle = '#444';
+    ctx.fillRect(x - 5, y - 10, 3, 3);
+    ctx.fillRect(x + 2, y - 10, 3, 3);
+    
+    // 嘴巴 - 简单线条
+    ctx.fillRect(x - 2, y - 5, 4, 1);
+    
     ctx.globalAlpha = 1;
 }
 
+// 物品绘制 - 复古像素风格，增加细节
 function drawItem(x, y, type, name) {
-    // 绘制物品
+    // 物品底部阴影
+    ctx.fillStyle = '#0a0a0a';
+    ctx.fillRect(x - 10, y + 8, 20, 3);
+    
+    // 绘制物品 - 复古像素风
     switch(type) {
         case 'desk':
-            ctx.fillStyle = '#5a4a3a';
-            ctx.fillRect(x - 18, y - 12, 36, 24);
-            ctx.fillStyle = '#4a3a2a';
-            ctx.fillRect(x - 15, y - 10, 30, 18);
-            ctx.fillStyle = '#3a2a1a';
-            ctx.fillRect(x - 16, y + 12, 6, 8);
-            ctx.fillRect(x + 10, y + 12, 6, 8);
+            // 木桌 - 深色
+            ctx.fillStyle = '#2a2018';
+            ctx.fillRect(x - 16, y - 10, 32, 20);
+            ctx.fillStyle = '#1a1510';
+            ctx.fillRect(x - 14, y - 8, 28, 16);
+            // 桌腿
+            ctx.fillStyle = '#1a1510';
+            ctx.fillRect(x - 14, y + 10, 4, 6);
+            ctx.fillRect(x + 10, y + 10, 4, 6);
             break;
         case 'cabinet':
         case 'shelf':
-            ctx.fillStyle = '#5a4a3a';
-            ctx.fillRect(x - 16, y - 16, 32, 32);
-            ctx.fillStyle = '#4a3a2a';
+            // 木柜
+            ctx.fillStyle = '#2a2018';
             ctx.fillRect(x - 14, y - 14, 28, 28);
-            ctx.fillStyle = '#8a7a6a';
-            ctx.fillRect(x - 2, y - 10, 4, 20);
+            ctx.fillStyle = '#1a1510';
+            ctx.fillRect(x - 12, y - 12, 24, 24);
+            // 中缝
+            ctx.fillStyle = '#0a0808';
+            ctx.fillRect(x - 1, y - 12, 2, 24);
             break;
         case 'drawer':
-        case 'drawer_open':
-            ctx.fillStyle = '#5a4a3a';
-            ctx.fillRect(x - 14, y - 10, 28, 20);
-            ctx.fillStyle = type === 'drawer_open' ? '#3a2a1a' : '#4a3a2a';
+            // 抽屉（锁住）
+            ctx.fillStyle = '#2a2018';
             ctx.fillRect(x - 12, y - 8, 24, 16);
-            ctx.fillStyle = '#ffd700';
-            ctx.fillRect(x - 3, y - 4, 6, 3);
+            ctx.fillStyle = '#1a1510';
+            ctx.fillRect(x - 10, y - 6, 20, 12);
+            // 锁孔
+            ctx.fillStyle = '#555';
+            ctx.fillRect(x - 2, y - 2, 4, 3);
+            break;
+        case 'drawer_open':
+            // 抽屉（打开）
+            ctx.fillStyle = '#2a2018';
+            ctx.fillRect(x - 12, y - 8, 24, 16);
+            ctx.fillStyle = '#0a0808';
+            ctx.fillRect(x - 10, y - 4, 20, 12);
             break;
         case 'board':
-            ctx.fillStyle = '#6a5a4a';
-            ctx.fillRect(x - 14, y - 14, 28, 28);
-            ctx.fillStyle = '#8a7a6a';
-            ctx.fillRect(x - 2, y - 16, 4, 32);
-            ctx.fillStyle = '#ddd';
+            // 公告板
+            ctx.fillStyle = '#3a3020';
+            ctx.fillRect(x - 12, y - 12, 24, 24);
+            ctx.fillStyle = '#2a2018';
             ctx.fillRect(x - 10, y - 10, 20, 20);
-            ctx.fillStyle = '#aaa';
-            ctx.fillRect(x - 6, y - 6, 12, 3);
-            ctx.fillRect(x - 6, y, 12, 3);
+            // 钉子
+            ctx.fillStyle = '#666';
+            ctx.fillRect(x - 2, y - 12, 4, 2);
+            ctx.fillRect(x - 2, y + 10, 4, 2);
             break;
         case 'window':
-            ctx.fillStyle = '#3a4a5a';
-            ctx.fillRect(x - 14, y - 16, 28, 32);
-            ctx.fillStyle = '#1a2a3a';
+            // 封死的窗户
+            ctx.fillStyle = '#1a1a1a';
+            ctx.fillRect(x - 12, y - 14, 24, 28);
+            ctx.fillStyle = '#111';
             ctx.fillRect(x - 10, y - 12, 20, 24);
-            ctx.fillStyle = '#5a6a7a';
-            ctx.fillRect(x - 1, y - 12, 2, 24);
-            ctx.fillRect(x - 10, y - 1, 20, 2);
+            // 木板封条
+            ctx.fillStyle = '#2a2018';
+            ctx.fillRect(x - 10, y - 6, 20, 4);
+            ctx.fillRect(x - 10, y + 2, 20, 4);
             break;
         case 'lamp':
-            ctx.fillStyle = '#4a4a4a';
-            ctx.fillRect(x - 3, y - 10, 6, 20);
-            ctx.fillStyle = '#ffd700';
-            ctx.fillRect(x - 8, y - 18, 16, 10);
-            ctx.fillStyle = '#fff';
-            ctx.fillRect(x - 5, y - 15, 10, 5);
+            // 落地灯
+            ctx.fillStyle = '#333';
+            ctx.fillRect(x - 2, y - 8, 4, 18);
+            ctx.fillStyle = '#444';
+            ctx.fillRect(x - 6, y - 14, 12, 8);
+            // 微光
+            ctx.fillStyle = '#3a3020';
+            ctx.fillRect(x - 4, y - 12, 8, 4);
             break;
         case 'key':
-            ctx.fillStyle = '#ffd700';
+            // 钥匙
+            ctx.fillStyle = '#555';
+            ctx.fillRect(x - 4, y - 4, 16, 8);
+            // 钥匙环
+            ctx.strokeStyle = '#555';
+            ctx.lineWidth = 2;
             ctx.beginPath();
-            ctx.arc(x - 6, y, 6, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillRect(x - 4, y - 3, 16, 6);
-            ctx.fillStyle = '#daa520';
-            ctx.fillRect(x + 8, y - 3, 4, 6);
-            ctx.fillRect(x + 12, y - 1, 3, 4);
+            ctx.arc(x - 6, y, 5, 0, Math.PI * 2);
+            ctx.stroke();
+            // 齿
+            ctx.fillRect(x + 6, y - 4, 3, 8);
+            ctx.fillRect(x + 10, y - 2, 2, 4);
             break;
         case 'bed':
-            ctx.fillStyle = '#5a4a3a';
-            ctx.fillRect(x - 18, y - 8, 36, 20);
-            ctx.fillStyle = '#7a6a5a';
-            ctx.fillRect(x - 16, y - 10, 32, 6);
-            ctx.fillStyle = '#f5f5f5';
-            ctx.fillRect(x - 14, y - 8, 10, 16);
-            ctx.fillStyle = '#6a6a8a';
-            ctx.fillRect(x - 2, y - 6, 16, 14);
+            // 小床
+            ctx.fillStyle = '#2a2018';
+            ctx.fillRect(x - 16, y - 6, 32, 18);
+            // 枕头
+            ctx.fillStyle = '#3a3530';
+            ctx.fillRect(x - 14, y - 8, 12, 6);
+            // 被子
+            ctx.fillStyle = '#333';
+            ctx.fillRect(x - 2, y - 4, 14, 14);
             break;
         case 'toy':
         case 'doll':
-            ctx.fillStyle = '#d4a574';
+            // 人偶
+            ctx.fillStyle = '#3a3028';
             ctx.beginPath();
-            ctx.arc(x, y - 8, 8, 0, Math.PI * 2);
+            ctx.arc(x, y - 6, 6, 0, Math.PI * 2);
             ctx.fill();
-            ctx.fillStyle = '#c44';
-            ctx.fillRect(x - 6, y, 12, 14);
-            ctx.fillStyle = '#333';
-            ctx.fillRect(x - 4, y - 10, 2, 2);
-            ctx.fillRect(x + 2, y - 10, 2, 2);
+            ctx.fillStyle = '#2a2018';
+            ctx.fillRect(x - 5, y, 10, 12);
+            // 眼睛
+            ctx.fillStyle = '#666';
+            ctx.fillRect(x - 3, y - 8, 2, 2);
+            ctx.fillRect(x + 1, y - 8, 2, 2);
             break;
         case 'bottle':
-            ctx.fillStyle = '#4a6a8a';
-            ctx.fillRect(x - 6, y - 8, 12, 20);
-            ctx.fillStyle = '#3a5a7a';
-            ctx.fillRect(x - 4, y - 14, 8, 8);
-            ctx.fillStyle = '#6a8aaa';
-            ctx.fillRect(x - 4, y - 4, 8, 10);
+            // 玻璃瓶 - 阿杰的收藏
+            ctx.fillStyle = '#1a2520';
+            ctx.fillRect(x - 5, y - 6, 10, 16);
+            ctx.fillStyle = '#111';
+            ctx.fillRect(x - 4, y - 12, 8, 8);
+            // 瓶口
+            ctx.fillStyle = '#333';
+            ctx.fillRect(x - 3, y - 14, 6, 4);
             break;
         case 'grave':
-            ctx.fillStyle = '#4a4a4a';
-            ctx.fillRect(x - 10, y - 5, 20, 20);
-            ctx.fillStyle = '#6a6a6a';
-            ctx.beginPath();
-            ctx.arc(x, y - 5, 10, Math.PI, 0);
-            ctx.fill();
+            // 坟墓
+            ctx.fillStyle = '#2a2a2a';
+            ctx.fillRect(x - 8, y - 4, 16, 16);
+            // 墓碑
             ctx.fillStyle = '#333';
-            ctx.fillRect(x - 2, y - 12, 4, 15);
+            ctx.beginPath();
+            ctx.arc(x, y - 4, 8, Math.PI, 0);
+            ctx.fill();
+            // 木牌
+            ctx.fillStyle = '#2a2018';
+            ctx.fillRect(x - 1, y - 10, 2, 12);
             break;
         case 'tree':
-            ctx.fillStyle = '#4a3a2a';
-            ctx.fillRect(x - 4, y, 8, 20);
-            ctx.fillStyle = '#2a5a2a';
+            // 枯树
+            ctx.fillStyle = '#2a2018';
+            ctx.fillRect(x - 3, y, 6, 18);
+            // 枯枝
+            ctx.strokeStyle = '#2a2018';
+            ctx.lineWidth = 2;
             ctx.beginPath();
-            ctx.arc(x, y - 10, 18, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = '#3a6a3a';
-            ctx.beginPath();
-            ctx.arc(x - 8, y - 5, 10, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(x + 8, y - 5, 10, 0, Math.PI * 2);
-            ctx.fill();
+            ctx.moveTo(x, y - 5);
+            ctx.lineTo(x - 10, y - 15);
+            ctx.moveTo(x, y);
+            ctx.lineTo(x + 8, y - 10);
+            ctx.stroke();
             break;
         case 'mirror':
-            ctx.fillStyle = '#6a5a4a';
-            ctx.fillRect(x - 12, y - 18, 24, 36);
-            ctx.fillStyle = '#aac';
+            // 镜子
+            ctx.fillStyle = '#2a2018';
+            ctx.fillRect(x - 10, y - 16, 20, 32);
+            ctx.fillStyle = '#1a1a1a';
             ctx.fillRect(x - 8, y - 14, 16, 28);
-            ctx.fillStyle = '#cce';
-            ctx.fillRect(x - 6, y - 10, 4, 8);
+            // 边框
+            ctx.strokeStyle = '#3a3020';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(x - 8, y - 14, 16, 28);
             break;
         case 'book':
-            ctx.fillStyle = '#8b4513';
-            ctx.fillRect(x - 12, y - 8, 24, 16);
-            ctx.fillStyle = '#a0522d';
+            // 旧书
+            ctx.fillStyle = '#2a1a18';
             ctx.fillRect(x - 10, y - 6, 20, 12);
-            ctx.fillStyle = '#ffd700';
-            ctx.fillRect(x - 8, y - 3, 3, 6);
+            ctx.fillStyle = '#1a0a08';
+            ctx.fillRect(x - 8, y - 4, 16, 8);
             break;
         case 'diary':
-            ctx.fillStyle = '#8b008b';
-            ctx.fillRect(x - 10, y - 8, 20, 16);
-            ctx.fillStyle = '#9b109b';
-            ctx.fillRect(x - 8, y - 6, 16, 12);
-            ctx.fillStyle = '#ffd700';
-            ctx.fillRect(x - 6, y - 4, 12, 2);
-            ctx.fillStyle = '#c44';
-            ctx.fillRect(x - 1, y - 1, 2, 4);
+            // 日记本
+            ctx.fillStyle = '#2a1a2a';
+            ctx.fillRect(x - 9, y - 7, 18, 14);
+            ctx.fillStyle = '#1a0a1a';
+            ctx.fillRect(x - 7, y - 5, 14, 10);
+            // 锁扣
+            ctx.fillStyle = '#555';
+            ctx.fillRect(x - 1, y - 2, 2, 3);
             break;
         case 'note':
-            ctx.fillStyle = '#f5f5dc';
-            ctx.fillRect(x - 10, y - 8, 20, 16);
-            ctx.fillStyle = '#333';
-            for (var n = -6; n < 6; n += 3) {
-                ctx.fillRect(x - 6, y + n, 12, 1);
-            }
+            // 纸片
+            ctx.fillStyle = '#2a2820';
+            ctx.fillRect(x - 8, y - 6, 16, 12);
+            ctx.fillStyle = '#1a1810';
+            ctx.fillRect(x - 6, y - 4, 12, 8);
             break;
         case 'computer':
-            ctx.fillStyle = '#333';
-            ctx.fillRect(x - 14, y - 18, 28, 22);
+            // 旧电脑（关闭）
+            ctx.fillStyle = '#2a2a2a';
+            ctx.fillRect(x - 12, y - 16, 24, 20);
+            ctx.fillStyle = '#1a1a1a';
+            ctx.fillRect(x - 10, y - 14, 20, 16);
+            // 底座
             ctx.fillStyle = '#222';
-            ctx.fillRect(x - 10, y - 14, 20, 14);
-            ctx.fillStyle = '#444';
-            ctx.fillRect(x - 10, y + 4, 20, 4);
+            ctx.fillRect(x - 8, y + 4, 16, 3);
             break;
         case 'computer_open':
-            ctx.fillStyle = '#333';
-            ctx.fillRect(x - 14, y - 18, 28, 22);
-            ctx.fillStyle = '#001100';
+            // 旧电脑（开启）
+            ctx.fillStyle = '#2a2a2a';
+            ctx.fillRect(x - 12, y - 16, 24, 20);
+            // 屏幕 - 绿色文字
+            ctx.fillStyle = '#0a1a0a';
             ctx.fillRect(x - 10, y - 14, 20, 14);
-            ctx.fillStyle = '#0f0';
+            ctx.fillStyle = '#2a4a2a';
             ctx.fillRect(x - 8, y - 12, 8, 2);
             ctx.fillRect(x - 8, y - 8, 12, 2);
             ctx.fillRect(x - 8, y - 4, 6, 2);
-            ctx.fillStyle = '#444';
-            ctx.fillRect(x - 10, y + 4, 20, 4);
+            // 底座
+            ctx.fillStyle = '#222';
+            ctx.fillRect(x - 8, y + 4, 16, 3);
             break;
         case 'safe':
-            ctx.fillStyle = '#555';
-            ctx.fillRect(x - 14, y - 14, 28, 28);
+            // 保险柜
             ctx.fillStyle = '#333';
+            ctx.fillRect(x - 12, y - 12, 24, 24);
+            ctx.fillStyle = '#222';
             ctx.fillRect(x - 10, y - 10, 20, 20);
-            ctx.fillStyle = '#888';
+            // 转盘
+            ctx.fillStyle = '#444';
             ctx.beginPath();
-            ctx.arc(x, y, 6, 0, Math.PI * 2);
+            ctx.arc(x, y, 5, 0, Math.PI * 2);
             ctx.fill();
-            ctx.fillStyle = '#666';
-            ctx.fillRect(x - 1, y - 6, 2, 12);
             break;
         case 'cage':
-            ctx.strokeStyle = '#888';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(x - 12, y - 18, 24, 30);
-            for (var c = -8; c <= 8; c += 4) {
+            // 鸟笼
+            ctx.strokeStyle = '#444';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(x - 10, y - 16, 20, 28);
+            // 栏杆
+            for (var c = -6; c <= 6; c += 3) {
                 ctx.beginPath();
-                ctx.moveTo(x + c, y - 18);
+                ctx.moveTo(x + c, y - 16);
                 ctx.lineTo(x + c, y + 12);
                 ctx.stroke();
             }
+            // 横杆
             ctx.beginPath();
-            ctx.moveTo(x - 12, y - 6);
-            ctx.lineTo(x + 12, y - 6);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(x - 12, y + 6);
-            ctx.lineTo(x + 12, y + 6);
+            ctx.moveTo(x - 10, y - 4);
+            ctx.lineTo(x + 10, y - 4);
+            ctx.moveTo(x - 10, y + 6);
+            ctx.lineTo(x + 10, y + 6);
             ctx.stroke();
             break;
         case 'photo':
-            ctx.fillStyle = '#f5f5f5';
-            ctx.fillRect(x - 12, y - 10, 24, 20);
-            ctx.fillStyle = '#ddd';
+            // 照片
+            ctx.fillStyle = '#3a3530';
+            ctx.fillRect(x - 10, y - 8, 20, 16);
+            ctx.fillStyle = '#2a2520';
             ctx.fillRect(x - 8, y - 6, 16, 12);
-            ctx.fillStyle = '#333';
-            ctx.fillRect(x - 6, y - 4, 4, 6);
-            ctx.fillRect(x + 2, y - 4, 4, 6);
             break;
         case 'paper':
-            ctx.fillStyle = '#f5f5dc';
-            ctx.fillRect(x - 8, y - 6, 16, 12);
-            ctx.fillStyle = '#c44';
-            ctx.fillRect(x - 6, y - 4, 4, 2);
+            // 纸张
+            ctx.fillStyle = '#3a3830';
+            ctx.fillRect(x - 7, y - 5, 14, 10);
             break;
         default:
-            ctx.fillStyle = '#8a8a8a';
-            ctx.fillRect(x - 10, y - 10, 20, 20);
-            ctx.fillStyle = '#aaa';
-            ctx.fillRect(x - 6, y - 6, 12, 12);
+            // 默认物品 - 灰色方块
+            ctx.fillStyle = '#2a2a2a';
+            ctx.fillRect(x - 8, y - 8, 16, 16);
+            ctx.fillStyle = '#333';
+            ctx.fillRect(x - 5, y - 5, 10, 10);
     }
     
-    // 显示物品名称
+    // 显示物品名称 - 简洁风格
     if (name) {
-        ctx.fillStyle = 'rgba(0,0,0,0.7)';
-        ctx.fillRect(x - 30, y + 16, 60, 16);
-        ctx.fillStyle = '#fff';
-        ctx.font = '10px sans-serif';
+        ctx.fillStyle = '#0a0a0a';
+        ctx.fillRect(x - 28, y + 14, 56, 14);
+        ctx.fillStyle = '#555';
+        ctx.font = '9px monospace';
         ctx.textAlign = 'center';
-        ctx.fillText(name, x, y + 27);
+        ctx.fillText(name, x, y + 23);
     }
 }
 
@@ -2022,8 +2299,8 @@ function update() {
     // 检查附近
     checkNear();
     
-    // 更新UI
-    document.getElementById('roomName').textContent = '📍 ' + room.name;
+    // 更新UI - 简洁风格
+    document.getElementById('roomName').textContent = room.name;
     document.getElementById('actBtn').style.display = nearObj ? 'block' : 'none';
     
     // BGM根据房间切换
@@ -2057,13 +2334,13 @@ function checkExits() {
             // 检查章节锁定
             if (e.requiresChapter && !chaptersUnlocked[e.requiresChapter]) {
                 var chapterName = '第' + e.requiresChapter + '章';
-                showDialog('🔒 ' + e.name, '这里被锁住了。需要先完成' + chapterName + '的探索。');
+                showDialog('[锁定] ' + e.name, '这里被锁住了。需要先完成' + chapterName + '的探索。');
                 return;
             }
             
             // 检查是否需要钥匙
             if (e.requires && inventory.indexOf(e.requires) < 0) {
-                showDialog('🔒 ' + e.name, e.lockedText || '这扇门需要钥匙才能打开。');
+                showDialog('[锁定] ' + e.name, e.lockedText || '这扇门需要钥匙才能打开。');
                 return;
             }
             
@@ -2139,11 +2416,11 @@ function interact() {
         // 显示出口信息
         if (nearObj.requiresChapter && !chaptersUnlocked[nearObj.requiresChapter]) {
             var chapterName = '第' + nearObj.requiresChapter + '章';
-            showDialog('🔒 ' + nearObj.name, '这里被锁住了。需要先完成' + chapterName + '的探索。');
+            showDialog('[锁定] ' + nearObj.name, '这里被锁住了。需要先完成' + chapterName + '的探索。');
         } else if (nearObj.requires && inventory.indexOf(nearObj.requires) < 0) {
-            showDialog('🔒 ' + nearObj.name, nearObj.lockedText || '这扇门需要钥匙。');
+            showDialog('[锁定] ' + nearObj.name, nearObj.lockedText || '这扇门需要钥匙。');
         } else {
-            showDialog('🚪 出口', '按E键/点击按钮进入 → ' + nearObj.name);
+            showDialog('[出口] ' + nearObj.name, '按E键/点击按钮进入 -> ' + nearObj.name);
         }
         return;
     }
@@ -2183,7 +2460,7 @@ function interact() {
         nearObj.lineIndex = (nearObj.lineIndex + 1) % lines.length;
         
         AudioSystem.playDialog();
-        showDialog(nearObj.name + '（幽灵）', text);
+        showDialog(nearObj.name + ' [幽灵]', text);
         
         // 保存对话进度
         saveGame();
@@ -2207,7 +2484,7 @@ function interact() {
                 nearObj.name = '抽屉（已开）';
                 nearObj.locked = false;
                 nearObj.requires = '钥匙';
-                showDialog('🔓 ' + nearObj.name, rooms.room3.items.find(function(i) { return i.type === 'drawer_open'; }).text);
+                showDialog('[已解锁] ' + nearObj.name, rooms.room3.items.find(function(i) { return i.type === 'drawer_open'; }).text);
                 if (rooms.room3.items.find(function(i) { return i.type === 'drawer_open'; }).clue) {
                     addClue(rooms.room3.items.find(function(i) { return i.type === 'drawer_open'; }).clue);
                 }
@@ -2220,7 +2497,7 @@ function interact() {
         
         if (nearObj.take) {
             inventory.push(nearObj.take);
-            showDialog(nearObj.name, '【获得物品】\n' + nearObj.text);
+            showDialog('[获得物品] ' + nearObj.name, nearObj.text);
             
             // 检查第四章解锁
             if (nearObj.take === '地下室钥匙') {
@@ -2239,7 +2516,7 @@ function interact() {
         if (nearObj.hidden && nearObj.name === '地上的纸片') {
             addClue('林小雨');
             setTimeout(function() {
-                showEnding('hidden', '🌟 隐藏结局：我是谁？', 
+                showEnding('hidden', '[隐藏结局] 我是谁？', 
                     '你看着地上的纸片，手指颤抖...\n\n"林小雨...7岁..."\n\n你突然头痛欲裂，记忆像碎片一样涌来——\n\n被拐卖、被送进孤儿院、被人领养、长大后成为记者...\n\n你一直在追查的真相，竟然与自己有关。\n\n27个孩子...包括你自己。\n\n你跪在泥土里，泪流满面。\n\n小雨...那是你失散的双胞胎妹妹吗？\n\n真相已经不重要了，因为你知道——\n\n她们都在这里，永远不会孤单。\n\n【游戏结束】');
             }, 2000);
         }
